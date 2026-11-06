@@ -1,4 +1,4 @@
-package com.example.compose
+package com.example.luma.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
