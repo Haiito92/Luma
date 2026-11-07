@@ -16,7 +16,7 @@ fun GuardiansContent(){
 }
 
 @Composable
-fun GuardiansPreview(){
+fun GuardiansScreenPreview(){
     LumaTheme() {
         GuardiansContent()
     }
