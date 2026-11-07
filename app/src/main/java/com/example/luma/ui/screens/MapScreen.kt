@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.ui.components.LumaDockedSearchBar
-import com.example.luma.ui.components.LumaNavigationBar
+import com.example.luma.ui.components.LumaScaffold
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.MapState
 import com.example.luma.viewmodel.MapViewModel
@@ -33,24 +33,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel()){
 
 @Composable
 fun MapContent(state: MapState, destinations: List<String>, onDestinationConfirmed: () -> Unit){
-    Scaffold(
-        bottomBar = {
-            LumaNavigationBar()
-        }
-    ) { innerPadding ->
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .padding(8.dp)
-            .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            when(state){
-                is MapState.SelectingDestination -> {
-                    DestinationSelection(destinations, onDestinationConfirmed)
-                }
-                is MapState.SelectingGuardians -> {
-                    GuardiansSelection()
-                }
+    LumaScaffold {
+        when(state){
+            is MapState.SelectingDestination -> {
+                DestinationSelection(destinations, onDestinationConfirmed)
+            }
+            is MapState.SelectingGuardians -> {
+                GuardiansSelection()
             }
         }
     }

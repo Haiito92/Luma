@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.ui.theme.Purple40
 
 @Composable
 fun SettingsScreen()
@@ -20,7 +19,7 @@ fun SettingsScreen()
         Column(modifier = Modifier.padding(innerPadding))
         {
             Text("Settings")
-            ButtonToggle("Night Mode")
+            ButtonToggle("Night Mode", {})
         }
     }
 }
