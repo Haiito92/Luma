@@ -2,6 +2,7 @@ package com.example.luma.ui.screens
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.theme.LumaTheme
@@ -17,6 +18,7 @@ fun GuardiansContent(){
     Text("Guardians")
 }
 
+@Preview
 @Composable
 fun GuardiansScreenPreview(){
     LumaTheme() {
