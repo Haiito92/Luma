@@ -1,5 +1,6 @@
 package com.example.luma.ui.screens
 
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,7 +16,7 @@ fun GuardiansScreen(viewModel: GuardiansViewModel = viewModel()){
 
 @Composable
 fun GuardiansContent(){
-    Text("Guardians")
+    Switch(false, {})
 }
 
 @Preview
