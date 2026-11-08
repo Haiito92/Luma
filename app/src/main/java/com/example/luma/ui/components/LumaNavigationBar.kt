@@ -10,22 +10,22 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 
 @Composable
-fun LumaNavigationBar(){
+fun LumaNavigationBar(currentRoute: String?, onNavigate: (String) -> Unit){
     NavigationBar(){
         NavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = { Icon(Icons.Default.Person, contentDescription = "Guardians")},
+            selected = currentRoute == "settings",
+            onClick = { onNavigate("settings") },
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Guardians")},
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
+            selected = currentRoute == "map",
+            onClick = { onNavigate("map") },
             icon = { Icon(Icons.Default.Home, contentDescription = "Home")},
         )
         NavigationBarItem(
-            selected = false,
-            onClick = {},
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings")},
+            selected = currentRoute == "guardians",
+            onClick = { onNavigate("guardians") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Settings")},
         )
     }
 }

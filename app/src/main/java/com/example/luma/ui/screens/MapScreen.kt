@@ -16,8 +16,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
-import com.example.luma.ui.components.LumaScaffold
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.MapState
 import com.example.luma.viewmodel.MapViewModel
@@ -33,14 +33,12 @@ fun MapScreen(viewModel: MapViewModel = viewModel()){
 
 @Composable
 fun MapContent(state: MapState, destinations: List<String>, onDestinationConfirmed: () -> Unit){
-    LumaScaffold {
-        when(state){
-            is MapState.SelectingDestination -> {
-                DestinationSelection(destinations, onDestinationConfirmed)
-            }
-            is MapState.SelectingGuardians -> {
-                GuardiansSelection()
-            }
+    when(state){
+        is MapState.SelectingDestination -> {
+            DestinationSelection(destinations, onDestinationConfirmed)
+        }
+        is MapState.SelectingGuardians -> {
+            GuardiansSelection()
         }
     }
 }
@@ -76,6 +74,8 @@ fun MapScreenPreview(){
     val places = listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")
 
     LumaTheme() {
-        MapContent(MapState.SelectingDestination, places, { })
+        LumaAppPreviewScaffold {
+            MapContent(MapState.SelectingDestination, places, { })
+        }
     }
 }
