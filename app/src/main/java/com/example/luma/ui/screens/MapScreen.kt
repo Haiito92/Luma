@@ -4,57 +4,66 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.MapState
+import com.example.luma.viewmodel.MapUiState
 import com.example.luma.viewmodel.MapViewModel
 
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel()){
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val places = listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")
 
-    MapContent(state, places, viewModel::onDestinationConfirmed)
+    MapContent(
+        state,
+        viewModel::onQueryChange,
+        viewModel::onMatchSelected,
+        viewModel::onDestinationConfirmed)
 }
 
 @Composable
-fun MapContent(state: MapState, destinations: List<String>, onDestinationConfirmed: () -> Unit){
+fun MapContent(
+    state: MapUiState,
+    onQueryChange: (String) -> Unit,
+    onMatchSelected: (String) -> Unit,
+    onDestinationConfirmed: () -> Unit
+){
     when(state){
-        is MapState.SelectingDestination -> {
-            DestinationSelection(destinations, onDestinationConfirmed)
+        is MapUiState.SelectingDestination -> {
+            DestinationSelection(state, onQueryChange, onMatchSelected, onDestinationConfirmed)
         }
-        is MapState.SelectingGuardians -> {
+        is MapUiState.SelectingGuardians -> {
             GuardiansSelection()
         }
     }
 }
 
 @Composable
-fun DestinationSelection(destinations: List<String>, onDestinationConfirmed: () -> Unit){
-
+fun DestinationSelection(
+    state: MapUiState.SelectingDestination,
+    onQueryChange: (String) -> Unit,
+    onMatchSelected: (String) -> Unit,
+    onDestinationConfirmed: () -> Unit
+){
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        LumaDockedSearchBar(destinations)
+        LumaDockedSearchBar(state.query, state.matches, onQueryChange, onMatchSelected)
 
-        Button({ onDestinationConfirmed() }){
+        Button({ onDestinationConfirmed() }, enabled = state.canConfirm){
             Text("Confirm")
         }
     }
@@ -71,11 +80,13 @@ fun GuardiansSelection(){
 @Preview
 @Composable
 fun MapScreenPreview(){
-    val places = listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")
-
     LumaTheme() {
         LumaAppPreviewScaffold {
-            MapContent(MapState.SelectingDestination, places, { })
+            MapContent(
+                MapUiState.SelectingDestination("", listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")),
+                {},
+                {},
+                {})
         }
     }
 }
