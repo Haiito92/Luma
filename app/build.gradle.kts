@@ -48,6 +48,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:<version>")
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.maplibre.compose)
+    runtimeOnly("org.maplibre.compose:maplibre-compose-runtime-vulkan-android:0.20.0")
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

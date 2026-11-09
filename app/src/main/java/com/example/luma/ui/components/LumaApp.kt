@@ -41,7 +41,6 @@ fun LumaApp(){
             startDestination = "map",
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(8.dp)
                 .fillMaxWidth()
         ) {
             composable("settings") { SettingsScreen() }
