@@ -1,7 +1,7 @@
 package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.luma.repository.MapRepository
+import com.example.luma.data.MapRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,10 +20,11 @@ sealed interface MapUiState{
     ) : MapUiState
 }
 
-class MapViewModel : ViewModel() {
+class MapViewModel(
+    private val mapRepository: MapRepository
+) : ViewModel() {
 
     // TODO Move construction of repository in the application container
-    private val mapRepository = MapRepository()
 
     private val _state = MutableStateFlow<MapUiState>(MapUiState.SelectingDestination("", listOf()))
     val state: StateFlow<MapUiState> = _state.asStateFlow()

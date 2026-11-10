@@ -23,6 +23,7 @@ import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.MapUiState
 import com.example.luma.viewmodel.MapViewModel
+import com.example.luma.viewmodel.MapViewModelFactory
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.overlay.CompassButton
@@ -34,7 +35,7 @@ import org.maplibre.compose.overlay.ZoomButtons
 import org.maplibre.compose.style.BaseStyle
 
 @Composable
-fun MapScreen(viewModel: MapViewModel = viewModel()){
+fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModelFactory)){
 
     val state by viewModel.state.collectAsStateWithLifecycle()
 

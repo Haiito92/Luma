@@ -1,4 +1,4 @@
-package com.example.luma.repository
+package com.example.luma.data
 
 class MapRepository {
     val places = listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")
