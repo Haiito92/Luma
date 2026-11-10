@@ -1,7 +1,10 @@
 package com.example.luma.data
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Looper
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -29,7 +32,14 @@ class LocationRepository(val context: Context) {
             }
         }
 
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+
+        if(!granted) { close(); return@callbackFlow }
+
         client.requestLocationUpdates(request, callback, Looper.getMainLooper())
-        awaitClose { client.removeLocationUpdates { callback } }
+        awaitClose { client.removeLocationUpdates(callback) }
     }
 }
