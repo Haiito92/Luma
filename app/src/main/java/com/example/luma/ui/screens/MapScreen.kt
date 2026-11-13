@@ -35,6 +35,7 @@ import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.MapUiState
 import com.example.luma.viewmodel.MapViewModel
 import com.example.luma.viewmodel.MapViewModelFactory
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.map.MapState
@@ -49,6 +50,7 @@ import org.maplibre.compose.overlay.ZoomButtons
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.spatialk.geojson.Position
 
 @Composable
 fun MapScreen(mapViewModel: MapViewModel = viewModel(factory = MapViewModelFactory)){
@@ -104,6 +106,20 @@ fun MapContent(
             CircleLayer(id = "user-dot", source = userSource,
                 radius = const(7.dp), color = const(MaterialTheme.colorScheme.primary))
         }
+
+    // We use this key to track when we get the first location,
+    // we move cam on first location received
+    val hasLocation = userLocation != null
+    LaunchedEffect(mapLibreState, hasLocation) {
+        userLocation?.let { userLocation ->
+            mapLibreState.animateCamera(
+                update = CameraUpdate(
+                    center = Position(latitude = userLocation.latLng.latitude, longitude = userLocation.latLng.longitude),
+                    zoom = 15.0
+                )
+            )
+        }
+    }
 
     MaplibreMap(state = mapLibreState,  modifier = Modifier
         .fillMaxWidth()
