@@ -14,6 +14,11 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
+data class UserLocation(
+    val latLng: LatLng,
+    val accuracy: Float
+)
+
 data class LatLng(
     val latitude: Double,
     val longitude: Double
@@ -24,13 +29,7 @@ class LocationRepository(val context: Context) {
 
     private val client = LocationServices.getFusedLocationProviderClient(context)
 
-    fun locationUpdates(): Flow<LatLng> = callbackFlow {
-        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
-        val callback = object : LocationCallback(){
-            override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let { trySend(LatLng(it.latitude, it.longitude)) }
-            }
-        }
+    fun locationUpdates(): Flow<UserLocation> = callbackFlow {
 
         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED ||
@@ -38,6 +37,13 @@ class LocationRepository(val context: Context) {
                 PackageManager.PERMISSION_GRANTED
 
         if(!granted) { close(); return@callbackFlow }
+
+        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000).build()
+        val callback = object : LocationCallback(){
+            override fun onLocationResult(result: LocationResult) {
+                result.lastLocation?.let { trySend(UserLocation(LatLng(it.latitude, it.longitude), it.accuracy)) }
+            }
+        }
 
         client.requestLocationUpdates(request, callback, Looper.getMainLooper())
         awaitClose { client.removeLocationUpdates(callback) }

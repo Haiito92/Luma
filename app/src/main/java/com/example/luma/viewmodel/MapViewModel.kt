@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.luma.data.LatLng
 import com.example.luma.data.LocationRepository
 import com.example.luma.data.MapRepository
+import com.example.luma.data.UserLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,10 +31,8 @@ class MapViewModel(
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
-    // TODO Move construction of repository in the application container
-
-    private val _userPosition = MutableStateFlow<LatLng?>(null)
-    val userPosition: StateFlow<LatLng?> = _userPosition.asStateFlow()
+    private val _userLocation = MutableStateFlow<UserLocation?>(null)
+    val userLocation: StateFlow<UserLocation?> = _userLocation.asStateFlow()
 
     private var locationJob: Job? = null
 
@@ -44,7 +43,7 @@ class MapViewModel(
         if (granted && locationJob == null) {
             locationJob = viewModelScope.launch {
                 locationRepository.locationUpdates()
-                    .collect { position -> _userPosition.value = position }
+                    .collect { position -> _userLocation.value = position }
             }
         }
     }
