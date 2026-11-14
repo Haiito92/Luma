@@ -32,12 +32,13 @@ import androidx.compose.ui.unit.times
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LumaDockedSearchBar(items: List<String>){
-    var query by rememberSaveable { mutableStateOf("") }
+fun LumaDockedSearchBar(
+    query: String,
+    matches: List<String>,
+    onQueryChange: (String) -> Unit,
+    onMatchSelected: (String) -> Unit
+){
     var expanded by rememberSaveable { mutableStateOf(false) }
-
-    // List just for test
-    val matches = items.filter { it.contains(query, ignoreCase = true) }.sorted()
 
     // Input field is 56.dp by default
     val inputFieldHeight: Dp = SearchBarDefaults.InputFieldHeight;
@@ -56,14 +57,14 @@ fun LumaDockedSearchBar(items: List<String>){
             SearchBarDefaults.InputField(
                 modifier = Modifier.height(inputFieldHeight),
                 query = query,
-                onQueryChange = { query = it },
-                onSearch = { query = it },
+                onQueryChange = onQueryChange,
+                onSearch = {  },
                 expanded = expanded,
                 onExpandedChange = { expanded = it },
                 placeholder = { Text("Where to ?") },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
+                        IconButton(onClick = { onQueryChange("") }) {
                             Icon(Icons.Default.Clear, contentDescription = "Clear")
                         }
                     }
@@ -83,15 +84,14 @@ fun LumaDockedSearchBar(items: List<String>){
                 }
             }
             else{
-                items(matches){ item ->
+                items(matches){ match ->
                     ListItem(
-                        headlineContent = { Text(item) },
-                        leadingContent = { Icon(Icons.Default.Place, contentDescription = item) },
+                        headlineContent = { Text(match) },
+                        leadingContent = { Icon(Icons.Default.Place, contentDescription = match) },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier.clickable{
-                            query = item
                             expanded = false
-                            // TODO Call view model function for onDestinationSelected
+                            onMatchSelected(match)
                         }
                     )
                 }
