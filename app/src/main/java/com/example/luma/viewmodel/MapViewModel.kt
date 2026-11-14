@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.luma.data.LocationRepository
 import com.example.luma.data.MapRepository
 import com.example.luma.data.Place
+import com.example.luma.data.SearchResult
 import com.example.luma.data.UserLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -13,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.io.IOException
-import retrofit2.HttpException
 import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface MapUiState{
@@ -69,14 +68,12 @@ class MapViewModel(
         // Start a new search, after a pause
         searchJob = viewModelScope.launch {
             delay(500.milliseconds)
-            val matches = try {
-                mapRepository.search(newQuery)
-            } catch (e: IOException) {
-                emptyList()          // offline or network problem
-            } catch (e: HttpException) {
-                emptyList()          // the server refused, for example when throttling
+            val result = mapRepository.search(newQuery)
+            when (result) {
+                is SearchResult.Success -> updateMatches(result.places)
+                SearchResult.NoConnection -> { /* TODO SHOW ERROR MESSAGE */ }
+                SearchResult.ServiceUnavailable -> { /* TODO SHOW ERROR MESSAGE */ }
             }
-            updateMatches(matches)
         }
     }
 
