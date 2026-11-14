@@ -1,10 +1,15 @@
 package com.example.luma.data
 
-class MapRepository {
-    val places = listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")
+data class Place(
+    val name: String,
+    val latLng: LatLng
+)
 
-    fun getMatches(query: String): List<String> {
+class MapRepository {
+    val places = listOf(Place("Home", LatLng(0.0,0.0)), Place("Gym", LatLng(100.0,100.0)))
+
+    fun getMatches(query: String): List<Place> {
         if (query.isBlank()) return listOf()
-        return places.filter { it.contains(query, ignoreCase = true) }.sorted()
+        return places.filter { it.name.contains(query, ignoreCase = true) }.sortedBy { it.name }
     }
 }

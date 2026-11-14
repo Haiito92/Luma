@@ -19,12 +19,6 @@ data class UserLocation(
     val accuracy: Float
 )
 
-data class LatLng(
-    val latitude: Double,
-    val longitude: Double
-)
-
-
 class LocationRepository(val context: Context) {
 
     private val client = LocationServices.getFusedLocationProviderClient(context)

@@ -29,14 +29,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.times
+import com.example.luma.data.Place
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LumaDockedSearchBar(
     query: String,
-    matches: List<String>,
+    matches: List<Place>,
     onQueryChange: (String) -> Unit,
-    onMatchSelected: (String) -> Unit
+    onMatchSelected: (Place) -> Unit
 ){
     var expanded by rememberSaveable { mutableStateOf(false) }
 
@@ -86,8 +87,8 @@ fun LumaDockedSearchBar(
             else{
                 items(matches){ match ->
                     ListItem(
-                        headlineContent = { Text(match) },
-                        leadingContent = { Icon(Icons.Default.Place, contentDescription = match) },
+                        headlineContent = { Text(match.name) },
+                        leadingContent = { Icon(Icons.Default.Place, contentDescription = match.name) },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         modifier = Modifier.clickable{
                             expanded = false

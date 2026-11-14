@@ -2,9 +2,9 @@ package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.luma.data.LatLng
 import com.example.luma.data.LocationRepository
 import com.example.luma.data.MapRepository
+import com.example.luma.data.Place
 import com.example.luma.data.UserLocation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,13 +16,13 @@ import kotlinx.coroutines.launch
 sealed interface MapUiState{
     data class SelectingDestination(
         val query: String = "",
-        val matches: List<String>,
-        val selectedDestination: String? = null,
+        val matches: List<Place>,
+        val selectedDestination: Place? = null,
     ) : MapUiState {
         val canConfirm: Boolean get() = selectedDestination != null
     }
     data class SelectingGuardians(
-        val destination: String
+        val destination: Place
     ) : MapUiState
 }
 
@@ -60,10 +60,10 @@ class MapViewModel(
         }
     }
 
-    fun onMatchSelected(match: String){
+    fun onMatchSelected(match: Place){
         _state.update { current ->
             if (current is MapUiState.SelectingDestination) {
-                current.copy(query = match, matches = listOf(), selectedDestination = match)
+                current.copy(query = match.name, matches = listOf(), selectedDestination = match)
             } else {
                 current
             }

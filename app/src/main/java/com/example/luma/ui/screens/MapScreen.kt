@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.data.LatLng
+import com.example.luma.data.Place
 import com.example.luma.data.UserLocation
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
@@ -92,7 +93,7 @@ fun MapContent(
     state: MapUiState,
     userLocation: UserLocation?,
     onQueryChange: (String) -> Unit,
-    onMatchSelected: (String) -> Unit,
+    onMatchSelected: (Place) -> Unit,
     onDestinationConfirmed: () -> Unit
 ){
     val mapLibreState =
@@ -146,7 +147,7 @@ fun DestinationSelection(
     state: MapUiState.SelectingDestination,
     mapLibreState: MapState,
     onQueryChange: (String) -> Unit,
-    onMatchSelected: (String) -> Unit,
+    onMatchSelected: (Place) -> Unit,
     onDestinationConfirmed: () -> Unit
 ){
 
@@ -205,7 +206,8 @@ fun MapScreenPreview(){
     LumaTheme() {
         LumaAppPreviewScaffold {
             MapContent(
-                MapUiState.SelectingDestination("", listOf("Home", "Pool", "Gym", "Graveyard", "School", "Shooting Range", "Apothecary", "Zoo")),
+                MapUiState.SelectingDestination("", listOf(Place("Home", LatLng(0.0, 0.0)), Place("Gym",
+                    LatLng(0.0 ,0.0)))),
                 UserLocation(LatLng(0.0,0.0), 0.0f),
                 {},
                 {},
