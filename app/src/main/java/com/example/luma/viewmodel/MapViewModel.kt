@@ -7,11 +7,15 @@ import com.example.luma.data.MapRepository
 import com.example.luma.data.Place
 import com.example.luma.data.UserLocation
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.io.IOException
+import retrofit2.HttpException
+import kotlin.time.Duration.Companion.milliseconds
 
 sealed interface MapUiState{
     data class SelectingDestination(
@@ -34,11 +38,12 @@ class MapViewModel(
     private val _userLocation = MutableStateFlow<UserLocation?>(null)
     val userLocation: StateFlow<UserLocation?> = _userLocation.asStateFlow()
 
-    private var locationJob: Job? = null
-
     private val _state = MutableStateFlow<MapUiState>(MapUiState.SelectingDestination("", listOf()))
     val state: StateFlow<MapUiState> = _state.asStateFlow()
 
+
+    private var locationJob: Job? = null
+    private var searchJob: Job? = null
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted && locationJob == null) {
             locationJob = viewModelScope.launch {
@@ -49,14 +54,36 @@ class MapViewModel(
     }
 
     fun onQueryChange(newQuery: String){
-        val newMatches = mapRepository.getMatches(newQuery)
 
+        // We do a first update for the text to not lag
         _state.update { current ->
             if (current is MapUiState.SelectingDestination) {
-                current.copy(query = newQuery, matches = newMatches, selectedDestination = null)
+                current.copy(query = newQuery, selectedDestination = null)
             } else {
                 current
             }
+        }
+
+        searchJob?.cancel()
+
+        // Start a new search, after a pause
+        searchJob = viewModelScope.launch {
+            delay(500.milliseconds)
+            val matches = try {
+                mapRepository.search(newQuery)
+            } catch (e: IOException) {
+                emptyList()          // offline or network problem
+            } catch (e: HttpException) {
+                emptyList()          // the server refused, for example when throttling
+            }
+            updateMatches(matches)
+        }
+    }
+
+    private fun updateMatches(matches: List<Place>) {
+        _state.update { current ->
+            if (current is MapUiState.SelectingDestination) current.copy(matches = matches)
+            else current
         }
     }
 

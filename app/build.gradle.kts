@@ -1,4 +1,7 @@
+import org.jetbrains.kotlin.gradle.internal.backend.common.serialization.metadata.DynamicTypeDeserializer.id
+
 plugins {
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.21"
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
@@ -35,6 +38,7 @@ android {
     }
 }
 
+
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -46,7 +50,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.compose.ui:ui-text-google-fonts")
     implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:<version>")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.maplibre.compose)
     implementation(libs.play.services.location)

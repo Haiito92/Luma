@@ -1,15 +1,27 @@
 package com.example.luma.data
 
+import com.example.luma.data.remote.PhotonApi
+
 data class Place(
     val name: String,
     val latLng: LatLng
 )
 
-class MapRepository {
-    val places = listOf(Place("Home", LatLng(0.0,0.0)), Place("Gym", LatLng(100.0,100.0)))
+class MapRepository(val photonApi: PhotonApi) {
 
-    fun getMatches(query: String): List<Place> {
-        if (query.isBlank()) return listOf()
-        return places.filter { it.name.contains(query, ignoreCase = true) }.sortedBy { it.name }
+    suspend fun search(query: String): List<Place> {
+        val response = photonApi.search(query)
+
+        return response.features.mapNotNull { feature ->
+            val name = feature.properties.name ?: return@mapNotNull null
+
+            val label = listOfNotNull(name, feature.properties.city, feature.properties.country)
+                .joinToString(", ")
+
+            Place(
+                name = label,
+                latLng = LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0])
+            )
+        }
     }
 }
