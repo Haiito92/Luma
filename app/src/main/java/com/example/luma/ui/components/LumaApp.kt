@@ -62,7 +62,6 @@ fun LumaApp() {
                 startDestination = "map",
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(8.dp)
                     .fillMaxWidth()
             ) {
                 composable("settings") {
@@ -101,19 +100,6 @@ fun LumaApp() {
                     FollowingCourseScreen(viewModel = followingViewModel)
                 }
             }
-            )
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "map",
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxWidth()
-        ) {
-            composable("settings") { SettingsScreen() }
-            composable("map") { MapScreen() }
-            composable("guardians") { GuardiansScreen() }
         }
     }
 }
