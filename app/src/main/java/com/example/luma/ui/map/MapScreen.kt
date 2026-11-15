@@ -1,4 +1,4 @@
-package com.example.luma.ui.screens
+package com.example.luma.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,22 +27,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.data.LatLng
 import com.example.luma.data.Place
+import com.example.luma.data.Route
 import com.example.luma.data.UserLocation
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.MapUiState
-import com.example.luma.viewmodel.MapViewModel
-import com.example.luma.viewmodel.MapViewModelFactory
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.overlay.CompassButton
 import org.maplibre.compose.overlay.ExpandingAttributionButton
-import org.maplibre.compose.overlay.MapOverlay
 import org.maplibre.compose.overlay.MaplibreLogo
 import org.maplibre.compose.overlay.ScaleBar
 import org.maplibre.compose.overlay.ZoomButtons
@@ -99,6 +95,17 @@ fun MapContent(
     val mapLibreState =
         rememberMapState(baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty")
         ){
+            // Route layer
+            val routeSource = rememberGeoJsonSource(
+                GeoJsonData.JsonString(state.routeOrNull().toGeoJson())
+            )
+
+            LineLayer(id = "route", source = routeSource,
+                width = const(4.dp), color = const(MaterialTheme.colorScheme.primary))
+
+            // TODO Add destination pin
+
+            // user location dots
             val userSource = rememberGeoJsonSource(
                 GeoJsonData.JsonString(userLocation.toGeoJson())
             )
@@ -223,3 +230,18 @@ private fun UserLocation?.toGeoJson(): String {
         return """{"type":"Feature","geometry":{"type":"Point","coordinates":[${latLng.longitude},${latLng.latitude}]},"properties":{}}"""
     }
 }
+
+private fun MapUiState.routeOrNull(): Route? {
+    return when (this){
+        is MapUiState.SelectingDestination -> (routeStatus as? RouteStatus.Ready)?.route
+        is MapUiState.SelectingGuardians -> route
+    }
+}
+
+private fun Route?.toGeoJson(): String =
+    if (this == null || points.size < 2) {
+        """{"type":"FeatureCollection","features":[]}"""
+    } else {
+        val coordinates = points.joinToString(",") { "[${it.longitude},${it.latitude}]" }
+        """{"type":"Feature","geometry":{"type":"LineString","coordinates":[$coordinates]},"properties":{}}"""
+    }

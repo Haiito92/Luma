@@ -18,7 +18,7 @@ import com.example.luma.ui.screens.AddGuardiansScreen
 import com.example.luma.ui.screens.FollowingCourseScreen
 import com.example.luma.ui.screens.FollowingScreen
 import com.example.luma.ui.screens.GuardiansScreen
-import com.example.luma.ui.screens.MapScreen
+import com.example.luma.ui.map.MapScreen
 import com.example.luma.ui.screens.SettingsScreen
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.FollowingViewModel

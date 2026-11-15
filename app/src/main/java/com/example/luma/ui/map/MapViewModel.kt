@@ -1,10 +1,12 @@
-package com.example.luma.viewmodel
+package com.example.luma.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.luma.data.LocationRepository
 import com.example.luma.data.MapRepository
 import com.example.luma.data.Place
+import com.example.luma.data.Route
+import com.example.luma.data.RouteResult
 import com.example.luma.data.SearchResult
 import com.example.luma.data.UserLocation
 import kotlinx.coroutines.Job
@@ -15,19 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-
-sealed interface MapUiState{
-    data class SelectingDestination(
-        val query: String = "",
-        val matches: List<Place>,
-        val selectedDestination: Place? = null,
-    ) : MapUiState {
-        val canConfirm: Boolean get() = selectedDestination != null
-    }
-    data class SelectingGuardians(
-        val destination: Place
-    ) : MapUiState
-}
 
 class MapViewModel(
     private val mapRepository: MapRepository,
@@ -43,6 +32,9 @@ class MapViewModel(
 
     private var locationJob: Job? = null
     private var searchJob: Job? = null
+
+    private var routeJob: Job? = null
+
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted && locationJob == null) {
             locationJob = viewModelScope.launch {
@@ -57,7 +49,7 @@ class MapViewModel(
         // We do a first update for the text to not lag
         _state.update { current ->
             if (current is MapUiState.SelectingDestination) {
-                current.copy(query = newQuery, selectedDestination = null)
+                current.copy(query = newQuery, selectedDestination = null, routeStatus = RouteStatus.Idle)
             } else {
                 current
             }
@@ -71,8 +63,8 @@ class MapViewModel(
             val result = mapRepository.search(newQuery)
             when (result) {
                 is SearchResult.Success -> updateMatches(result.places)
-                SearchResult.NoConnection -> { /* TODO SHOW ERROR MESSAGE */ }
-                SearchResult.ServiceUnavailable -> { /* TODO SHOW ERROR MESSAGE */ }
+                is SearchResult.NoConnection -> { /* TODO SHOW ERROR MESSAGE */ }
+                is SearchResult.ServiceUnavailable -> { /* TODO SHOW ERROR MESSAGE */ }
             }
         }
     }
@@ -85,11 +77,40 @@ class MapViewModel(
     }
 
     fun onMatchSelected(match: Place){
+        routeJob?.cancel()
+
+        val currentUserLocation = _userLocation.value
+
         _state.update { current ->
             if (current is MapUiState.SelectingDestination) {
-                current.copy(query = match.name, matches = listOf(), selectedDestination = match)
+                current.copy(
+                    query = match.name,
+                    matches = emptyList(),
+                    selectedDestination = match,
+                    routeStatus = if(currentUserLocation == null) RouteStatus.NoLocation else RouteStatus.Loading)
             } else {
                 current
+            }
+        }
+
+        if (currentUserLocation == null) return
+
+        routeJob = viewModelScope.launch {
+            delay(500.milliseconds)
+            val routeResult = mapRepository.route(currentUserLocation.latLng, match.latLng)
+
+            val routeStatus = when (routeResult){
+                is RouteResult.Success -> RouteStatus.Ready(routeResult.route)
+                is RouteResult.NoRoute -> RouteStatus.NoRoute
+                is RouteResult.NoConnection -> RouteStatus.NoConnection
+                is RouteResult.ServiceUnavailable -> RouteStatus.Failed
+            }
+
+            _state.update { current ->
+                // ignore a late answer for a place the user has since changed
+                if (current is MapUiState.SelectingDestination && current.selectedDestination == match)
+                    current.copy(routeStatus = routeStatus)
+                else current
             }
         }
     }
@@ -98,6 +119,7 @@ class MapViewModel(
         val currentState = _state.value as? MapUiState.SelectingDestination ?: return
         val destination = currentState.selectedDestination ?: return
 
-        _state.update { MapUiState.SelectingGuardians(destination) }
+        // TODO Give actual route
+        _state.update { MapUiState.SelectingGuardians(destination, Route(emptyList(), 0.0, 0.0)) }
     }
 }

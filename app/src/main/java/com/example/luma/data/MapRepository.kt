@@ -1,25 +1,16 @@
 package com.example.luma.data
 
+import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
 import kotlinx.io.IOException
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 
-data class Place(
-    val name: String,
-    val latLng: LatLng
-)
 
-sealed interface SearchResult {
-    data class Success(val places: List<Place>) : SearchResult
-    object NoConnection : SearchResult
-    object ServiceUnavailable : SearchResult      // server error, throttled, bad data
-}
-
-class MapRepository(val photonApi: PhotonApi) {
+class MapRepository(val photonApi: PhotonApi, val osmrApi: OsmrApi) {
 
     suspend fun search(query: String): SearchResult {
-        try {
+        return try {
             val trimmed = query.trim()
             val response = photonApi.search(trimmed)
 
@@ -35,14 +26,37 @@ class MapRepository(val photonApi: PhotonApi) {
                 )
             }
 
-            return SearchResult.Success(filtered)
+            SearchResult.Success(filtered)
 
-        }   catch (e: IOException) {
-            return SearchResult.NoConnection
+        } catch (e: IOException) {
+            SearchResult.NoConnection
         } catch (e: HttpException) {
-            return SearchResult.ServiceUnavailable
+            SearchResult.ServiceUnavailable
         } catch (e: SerializationException) {
-            return SearchResult.ServiceUnavailable
+            SearchResult.ServiceUnavailable
         }
+    }
+
+    suspend fun route(from: LatLng, to: LatLng): RouteResult{
+        val coordinates = "${from.longitude},${from.latitude};${to.longitude},${to.latitude}"
+
+        return try {
+            val response = osmrApi.route(coordinates)
+            val best = response.routes.firstOrNull() ?: return RouteResult.NoRoute
+
+            return RouteResult.Success(Route(
+                points = best.geometry.coordinates.map { LatLng(latitude = it[1], longitude = it[0] )},
+                distanceMeters = best.distance,
+                durationSeconds = best.duration
+            ))
+
+        } catch (e: IOException) {
+            RouteResult.NoConnection
+        } catch (e: HttpException) {
+            RouteResult.ServiceUnavailable
+        } catch (e: SerializationException) {
+            RouteResult.ServiceUnavailable
+        }
+
     }
 }

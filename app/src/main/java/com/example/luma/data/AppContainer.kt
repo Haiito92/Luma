@@ -1,6 +1,7 @@
 package com.example.luma.data
 
 import android.content.Context
+import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -15,7 +16,17 @@ class AppContainer(context: Context) {
         )
         .build()
         .create(PhotonApi::class.java)
-    val mapRepository = MapRepository(photonApi)
+
+    private val osmrApi: OsmrApi = Retrofit.Builder()
+        .baseUrl("https://routing.openstreetmap.de/")
+        .addConverterFactory(
+            Json {ignoreUnknownKeys = true}.asConverterFactory("application/json".toMediaType())
+        )
+        .build()
+        .create(OsmrApi::class.java)
+
+
+    val mapRepository = MapRepository(photonApi, osmrApi)
 
     val locationRepository = LocationRepository(context.applicationContext)
 }
