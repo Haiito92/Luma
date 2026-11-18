@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "824978548259",
+    "firebase_url": "https://lumadb-8701d-default-rtdb.firebaseio.com",
+    "project_id": "lumadb-8701d",
+    "storage_bucket": "lumadb-8701d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824978548259:android:ba8e411731722de908b396",
+        "android_client_info": {
+          "package_name": "com.example.luma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvI9NQd5VKqixEeDVdbDwSR6FDxB4Z724"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

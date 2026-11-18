@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -50,6 +51,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:<version>")
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.firestore)
     implementation(libs.maplibre.compose)
     implementation(libs.play.services.location)
     runtimeOnly("org.maplibre.compose:maplibre-compose-runtime-vulkan-android:0.20.0")
