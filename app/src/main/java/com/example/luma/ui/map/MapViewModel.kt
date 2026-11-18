@@ -2,13 +2,13 @@ package com.example.luma.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.luma.data.LocationRepository
-import com.example.luma.data.MapRepository
-import com.example.luma.data.Place
-import com.example.luma.data.Route
-import com.example.luma.data.RouteResult
-import com.example.luma.data.SearchResult
-import com.example.luma.data.UserLocation
+import com.example.luma.data.local.LocationRepository
+import com.example.luma.data.local.MapRepository
+import com.example.luma.data.local.Place
+import com.example.luma.data.local.RouteResult
+import com.example.luma.data.local.SearchResult
+import com.example.luma.data.local.UserLocation
+import com.example.luma.data.local.WalkRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class MapViewModel(
     private val mapRepository: MapRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val walkRepository: WalkRepository
 ) : ViewModel() {
 
     private val _userLocation = MutableStateFlow<UserLocation?>(null)
@@ -115,23 +116,16 @@ class MapViewModel(
         }
     }
 
-    fun onDestinationConfirmed(){
-        val currentState = _state.value as? MapUiState.SelectingDestination ?: return
-        val destination = currentState.selectedDestination ?: return
+    fun onDestinationConfirmed() {
+        /* TODO move verification in walk repository*/
+        val currentState = _state.value;
 
-        when (currentState.routeStatus){
-            is RouteStatus.Ready -> {
-                // TODO Go to guardian selection instead of going straight to walk
-                // _state.update { MapUiState.SelectingGuardians(destination, Route(emptyList(), 0.0, 0.0)) }
-
-                _state.update { MapUiState.WalkInProgress(destination, currentState.routeStatus.route) }
+        if (currentState is MapUiState.SelectingDestination){
+            val destination = currentState.selectedDestination?: return
+            if(currentState.routeStatus is RouteStatus.Ready){
+                walkRepository.startWalk(destination, currentState.routeStatus.route)
+                /* TODO Check for response to see if a walk was started. If so, change ui state */
             }
-            /* TODO handle other cases */
-            is RouteStatus.Idle -> {}
-            is RouteStatus.Loading -> {}
-            is RouteStatus.Failed -> {}
-            is RouteStatus.NoRoute -> {}
-            is RouteStatus.NoLocation -> {}
-            is RouteStatus.NoConnection -> {}
-        }}
+        }
+    }
 }

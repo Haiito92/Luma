@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 import android.Manifest
 import android.content.Context

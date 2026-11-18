@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 sealed interface RouteResult {
     data class Success(val route: Route) : RouteResult

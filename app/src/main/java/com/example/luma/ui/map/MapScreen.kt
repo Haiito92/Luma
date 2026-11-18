@@ -25,10 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.luma.data.LatLng
-import com.example.luma.data.Place
-import com.example.luma.data.Route
-import com.example.luma.data.UserLocation
+import com.example.luma.data.local.LatLng
+import com.example.luma.data.local.Place
+import com.example.luma.data.local.Route
+import com.example.luma.data.local.UserLocation
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
@@ -236,14 +236,6 @@ private fun UserLocation?.toGeoJson(): String {
         return """{"type":"FeatureCollection","features":[]}"""
     } else {
         return """{"type":"Feature","geometry":{"type":"Point","coordinates":[${latLng.longitude},${latLng.latitude}]},"properties":{}}"""
-    }
-}
-
-private fun MapUiState.routeOrNull(): Route? {
-    return when (this){
-        is MapUiState.SelectingDestination -> (routeStatus as? RouteStatus.Ready)?.route
-        is MapUiState.SelectingGuardians -> route
-        is MapUiState.WalkInProgress -> route
     }
 }
 

@@ -10,7 +10,8 @@ val MapViewModelFactory = viewModelFactory {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
         MapViewModel(
             app.container.mapRepository,
-            app.container.locationRepository
+            app.container.locationRepository,
+            app.container.walkRepository
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi

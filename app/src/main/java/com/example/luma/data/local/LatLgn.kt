@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 data class LatLng(
     val latitude: Double,

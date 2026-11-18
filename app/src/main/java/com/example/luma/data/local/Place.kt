@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 data class Place(
     val name: String,

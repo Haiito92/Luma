@@ -1,7 +1,7 @@
 package com.example.luma.ui.map
 
-import com.example.luma.data.Place
-import com.example.luma.data.Route
+import com.example.luma.data.local.Place
+import com.example.luma.data.local.Route
 
 sealed interface RouteStatus{
     object Idle : RouteStatus
@@ -31,4 +31,12 @@ sealed interface MapUiState{
         val destination: Place,
         val route: Route
     ) : MapUiState
+}
+
+fun MapUiState.routeOrNull(): Route? {
+    return when (this){
+        is MapUiState.SelectingDestination -> (routeStatus as? RouteStatus.Ready)?.route
+        is MapUiState.SelectingGuardians -> route
+        is MapUiState.WalkInProgress -> route
+    }
 }

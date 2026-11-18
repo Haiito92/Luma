@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 sealed interface SearchResult {
     data class Success(val places: List<Place>) : SearchResult

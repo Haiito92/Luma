@@ -1,6 +1,9 @@
 package com.example.luma.data
 
 import android.content.Context
+import com.example.luma.data.local.LocationRepository
+import com.example.luma.data.local.MapRepository
+import com.example.luma.data.local.WalkRepository
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
 import kotlinx.serialization.json.Json
@@ -29,4 +32,6 @@ class AppContainer(context: Context) {
     val mapRepository = MapRepository(photonApi, osmrApi)
 
     val locationRepository = LocationRepository(context.applicationContext)
+
+    val walkRepository = WalkRepository()
 }
