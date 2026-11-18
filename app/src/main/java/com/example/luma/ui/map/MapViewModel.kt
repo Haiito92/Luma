@@ -119,7 +119,19 @@ class MapViewModel(
         val currentState = _state.value as? MapUiState.SelectingDestination ?: return
         val destination = currentState.selectedDestination ?: return
 
-        // TODO Give actual route
-        _state.update { MapUiState.SelectingGuardians(destination, Route(emptyList(), 0.0, 0.0)) }
-    }
+        when (currentState.routeStatus){
+            is RouteStatus.Ready -> {
+                // TODO Go to guardian selection instead of going straight to walk
+                // _state.update { MapUiState.SelectingGuardians(destination, Route(emptyList(), 0.0, 0.0)) }
+
+                _state.update { MapUiState.WalkInProgress(destination, currentState.routeStatus.route) }
+            }
+            /* TODO handle other cases */
+            is RouteStatus.Idle -> {}
+            is RouteStatus.Loading -> {}
+            is RouteStatus.Failed -> {}
+            is RouteStatus.NoRoute -> {}
+            is RouteStatus.NoLocation -> {}
+            is RouteStatus.NoConnection -> {}
+        }}
 }

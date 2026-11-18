@@ -26,4 +26,9 @@ sealed interface MapUiState{
         val destination: Place,
         val route: Route
     ) : MapUiState
+
+    data class WalkInProgress(
+        val destination: Place,
+        val route: Route
+    ) : MapUiState
 }

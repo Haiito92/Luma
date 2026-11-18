@@ -145,6 +145,9 @@ fun MapContent(
             is MapUiState.SelectingGuardians -> {
                 GuardiansSelection()
             }
+            is MapUiState.WalkInProgress -> {
+                CurrentWalk()
+            }
         }
     }
 }
@@ -207,6 +210,11 @@ fun GuardiansSelection(){
     }
 }
 
+@Composable
+fun CurrentWalk(){
+
+}
+
 @Preview
 @Composable
 fun MapScreenPreview(){
@@ -235,6 +243,7 @@ private fun MapUiState.routeOrNull(): Route? {
     return when (this){
         is MapUiState.SelectingDestination -> (routeStatus as? RouteStatus.Ready)?.route
         is MapUiState.SelectingGuardians -> route
+        is MapUiState.WalkInProgress -> route
     }
 }
 
