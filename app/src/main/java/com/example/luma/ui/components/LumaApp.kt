@@ -14,7 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.luma.ui.screens.GuardiansScreen
 import com.example.luma.ui.screens.LoginScreen
-import com.example.luma.ui.screens.MapScreen
+import com.example.luma.ui.map.MapScreen
 import com.example.luma.ui.screens.SettingsScreen
 import com.example.luma.ui.screens.SignUpScreen
 
