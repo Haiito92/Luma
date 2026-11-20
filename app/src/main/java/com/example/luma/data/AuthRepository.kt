@@ -12,12 +12,11 @@ data class LumaUser(
     val name: String = "",
     val lastName: String = "",
     val email: String = "",
-    val position: GeoPoint = GeoPoint(0.0, 0.0)
 )
 
-class AuthRepository {
+class AuthRepository (val db: FirebaseFirestore){
     private val usersCollection by lazy {
-        FirebaseFirestore.getInstance().collection("user")
+        db.collection("user")
     }
 
     private val _currentUser = MutableStateFlow<LumaUser?>(null)
@@ -42,7 +41,6 @@ class AuthRepository {
                         name = document.getString("name") ?: "",
                         lastName = document.getString("last name") ?: "",
                         email = document.getString("email") ?: trimmedEmail,
-                        position = document.getGeoPoint("position") ?: GeoPoint(0.0, 0.0)
                     )
                     _currentUser.value = user
                     onResult(Result.success(user))
@@ -101,7 +99,6 @@ class AuthRepository {
                                     name = trimmedName,
                                     lastName = trimmedLastName,
                                     email = trimmedEmail,
-                                    position = initialPosition
                                 )
                                 _currentUser.value = user
                                 onResult(Result.success(user))

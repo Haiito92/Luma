@@ -6,6 +6,7 @@ import com.example.luma.data.local.MapRepository
 import com.example.luma.data.local.WalkRepository
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -13,6 +14,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class AppContainer(context: Context) {
+
+    private val db = FirebaseFirestore.getInstance()
+
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
             chain.proceed(
@@ -48,7 +52,7 @@ class AppContainer(context: Context) {
 
 	val walkRepository = WalkRepository()
 
-    val authRepository = AuthRepository()
+    val authRepository = AuthRepository(db)
 
     val settingsRepository = SettingsRepository()
 
