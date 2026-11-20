@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -266,28 +265,40 @@ fun CurrentWalk(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally) {
 
-        Row(modifier = Modifier
-            .fillMaxWidth()) {
-            FilledTonalButton({ onWalkCanceled() }, modifier = Modifier
-                .weight(1.0f)) {
-                Text("Cancel")
+        // Directions
+
+        // Buttons
+        Column(modifier = Modifier
+            .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(modifier = Modifier
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilledTonalButton({ onWalkCanceled() }, modifier = Modifier
+                    .weight(1.0f)) {
+                    Text("Cancel")
+                }
+                FilledTonalButton({ onWalkFinished() }, modifier = Modifier
+                    .weight(1.0f)) {
+                    Text("Finish")
+                }
             }
-            FilledTonalButton({ onWalkFinished() }, modifier = Modifier
-                .weight(1.0f)) {
-                Text("Finish")
+
+            Row(modifier = Modifier
+                .height(150.dp)
+                .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center) {
+                Button({ onSosSent() }, modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("SOS")
+                }
             }
         }
 
-        Row(modifier = Modifier
-            .height(150.dp)
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center) {
-            Button({ onSosSent() }, modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()) {
-                Text("SOS")
-            }
-        }
     }
 }
 
