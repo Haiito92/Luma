@@ -13,6 +13,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.luma.LumaApplication
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -261,13 +263,21 @@ fun LumaTheme(
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
+  val context = LocalContext.current
+  val settingsNightMode = (context.applicationContext as? LumaApplication)
+      ?.container
+      ?.settingsRepository
+      ?.nightMode
+      ?.collectAsStateWithLifecycle()
+      ?.value
+  val effectiveDarkTheme = settingsNightMode ?: darkTheme
+
   val colorScheme = when {
       dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-          val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+          if (effectiveDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
       
-      darkTheme -> darkScheme
+      effectiveDarkTheme -> darkScheme
       else -> lightScheme
   }
 

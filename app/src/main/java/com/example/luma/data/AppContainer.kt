@@ -46,5 +46,11 @@ class AppContainer(context: Context) {
 
     val locationRepository = LocationRepository(context.applicationContext)
 
-    val walkRepository = WalkRepository()
+	val walkRepository = WalkRepository()
+
+    val authRepository = AuthRepository()
+
+    val settingsRepository = SettingsRepository()
+
+    val guardiansRepository = GuardiansRepository()
 }

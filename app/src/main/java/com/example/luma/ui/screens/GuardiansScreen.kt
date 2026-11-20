@@ -1,5 +1,6 @@
 package com.example.luma.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,36 +34,57 @@ import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.GuardiansTab
+import com.example.luma.viewmodel.GuardiansUiState
 import com.example.luma.viewmodel.GuardiansViewModel
+import com.example.luma.viewmodel.GuardiansViewModelFactory
 
 @Composable
 fun GuardiansScreen(
-    viewModel: GuardiansViewModel = viewModel(),
-    onAddGuardiansClick: () -> Unit = {},
-    onGuardedContactClick: (String) -> Unit = {}
+    viewModel: GuardiansViewModel = viewModel(factory = GuardiansViewModelFactory)
 ) {
-    val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val guardians by viewModel.guardians.collectAsStateWithLifecycle()
     val guarded by viewModel.guarded.collectAsStateWithLifecycle()
 
-    val contacts = when (selectedTab) {
-        GuardiansTab.Guardians -> guardians
-        GuardiansTab.Guarded -> guarded
+    LaunchedEffect(Unit) {
+        viewModel.onBackToContacts()
     }
 
-    GuardiansContent(
-        selectedTab = selectedTab,
-        contacts = contacts,
-        onGuardiansTabClick = { viewModel.onTabSelected(GuardiansTab.Guardians) },
-        onGuardedTabClick = { viewModel.onTabSelected(GuardiansTab.Guarded) },
-        onContactClick = { name ->
-            if (selectedTab == GuardiansTab.Guarded) {
-                viewModel.onContactSelected(name)
-                onGuardedContactClick(name)
+    BackHandler(enabled = state !is GuardiansUiState.ViewingContacts) {
+        viewModel.onBackToContacts()
+    }
+
+    when (val currentState = state) {
+        is GuardiansUiState.ViewingContacts -> {
+            val contacts = when (currentState.selectedTab) {
+                GuardiansTab.Guardians -> guardians
+                GuardiansTab.Guarded -> guarded
             }
-        },
-        onAddGuardiansClick = onAddGuardiansClick
-    )
+
+            GuardiansContent(
+                selectedTab = currentState.selectedTab,
+                contacts = contacts,
+                onGuardiansTabClick = { viewModel.onTabSelected(GuardiansTab.Guardians) },
+                onGuardedTabClick = { viewModel.onTabSelected(GuardiansTab.Guarded) },
+                onContactClick = { name ->
+                    if (currentState.selectedTab == GuardiansTab.Guarded) {
+                        viewModel.onGuardedContactClicked(name)
+                    }
+                },
+                onAddGuardiansClick = viewModel::onOpenAddGuardian
+            )
+        }
+
+        is GuardiansUiState.AddingGuardian -> {
+            AddGuardiansContent(
+                onAddGuardian = viewModel::onAddGuardian
+            )
+        }
+
+        is GuardiansUiState.ViewingCourse -> {
+            FollowingCourseContent(person = currentState.person)
+        }
+    }
 }
 
 @Composable

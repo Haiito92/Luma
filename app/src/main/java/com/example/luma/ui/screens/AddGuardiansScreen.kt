@@ -19,10 +19,11 @@ import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.components.LumaTextField
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.GuardiansViewModel
+import com.example.luma.viewmodel.GuardiansViewModelFactory
 
 @Composable
 fun AddGuardiansScreen(
-    viewModel: GuardiansViewModel = viewModel(),
+    viewModel: GuardiansViewModel = viewModel(factory = GuardiansViewModelFactory),
     onGuardianAdded: () -> Unit = {}
 ) {
     AddGuardiansContent(

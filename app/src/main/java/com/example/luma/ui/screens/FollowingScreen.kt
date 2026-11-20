@@ -17,10 +17,11 @@ import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.FollowedPerson
 import com.example.luma.viewmodel.FollowingViewModel
+import com.example.luma.viewmodel.FollowingViewModelFactory
 
 @Composable
 fun FollowingScreen(
-    viewModel: FollowingViewModel = viewModel(),
+    viewModel: FollowingViewModel = viewModel(factory = FollowingViewModelFactory),
     onPersonClick: (FollowedPerson) -> Unit = {}
 ) {
     val followedPeople by viewModel.followedPeople.collectAsStateWithLifecycle()

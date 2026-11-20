@@ -27,12 +27,15 @@ import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.FollowedPerson
 import com.example.luma.viewmodel.FollowingViewModel
+import com.example.luma.viewmodel.FollowingViewModelFactory
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun FollowingCourseScreen(viewModel: FollowingViewModel = viewModel()) {
+fun FollowingCourseScreen(
+    viewModel: FollowingViewModel = viewModel(factory = FollowingViewModelFactory)
+) {
     val selectedPerson by viewModel.selectedPerson.collectAsStateWithLifecycle()
 
     FollowingCourseContent(person = selectedPerson)
