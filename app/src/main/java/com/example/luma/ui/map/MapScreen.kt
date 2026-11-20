@@ -116,7 +116,17 @@ fun MapContent(
             LineLayer(id = "route", source = routeSource,
                 width = const(4.dp), color = const(MaterialTheme.colorScheme.primary))
 
-            // TODO Add destination pin
+            // destination pin
+
+            val destinationSource = rememberGeoJsonSource(
+                GeoJsonData.JsonString(state.destinationOrNull()?.latLng.toPointGeoJson())
+            )
+
+            CircleLayer(id = "destination-dot-outline", source = destinationSource,
+                radius = const(10.dp), color = const(MaterialTheme.colorScheme.background))
+            CircleLayer(id = "destination-dot", source = destinationSource,
+                radius = const(7.dp), color = const(MaterialTheme.colorScheme.tertiary))
+
 
             // user location dots
             val userSource = rememberGeoJsonSource(
@@ -300,13 +310,15 @@ fun MapScreenPreview(){
     }
 }
 
-private fun UserLocation?.toGeoJson(): String {
+private fun UserLocation?.toGeoJson(): String =
+    this?.latLng?.toPointGeoJson() ?: """{"type":"FeatureCollection","features":[]}"""
+
+private fun LatLng?.toPointGeoJson(): String =
     if (this == null) {
-        return """{"type":"FeatureCollection","features":[]}"""
+        """{"type":"FeatureCollection","features":[]}"""
     } else {
-        return """{"type":"Feature","geometry":{"type":"Point","coordinates":[${latLng.longitude},${latLng.latitude}]},"properties":{}}"""
+        """{"type":"Feature","geometry":{"type":"Point","coordinates":[$longitude,$latitude]},"properties":{}}"""
     }
-}
 
 private fun Route?.toGeoJson(): String =
     if (this == null || points.size < 2) {

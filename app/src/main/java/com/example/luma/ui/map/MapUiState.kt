@@ -41,3 +41,9 @@ fun MapUiState.routeOrNull(): Route? {
         is MapUiState.WalkInProgress -> walk.route
     }
 }
+
+fun MapUiState.destinationOrNull(): Place? = when (this) {
+    is MapUiState.SelectingDestination -> selectedDestination
+    is MapUiState.SelectingGuardians -> destination      // if that state carries it
+    is MapUiState.WalkInProgress -> walk.destination
+}

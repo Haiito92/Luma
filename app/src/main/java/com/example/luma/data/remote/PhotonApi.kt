@@ -7,7 +7,7 @@ interface PhotonApi {
     @GET("api/")
     suspend fun search(
         @Query("q") query: String,
-        @Query("limit") limit: Int = 5,
+        @Query("limit") limit: Int = 15,
         @Query("lang") lang: String = "en",
         @Query("lat") lat: Double? = null,
         @Query("lon") lon: Double? = null

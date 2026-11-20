@@ -10,7 +10,7 @@ import retrofit2.HttpException
 
 class MapRepository(val photonApi: PhotonApi, val osmrApi: OsmrApi) {
 
-    fun isSearchable(query: String): Boolean = query.trim().length >= 3
+    fun isSearchable(query: String): Boolean = query.trim().length >= 1
 
     suspend fun search(query: String): SearchResult {
         if (!isSearchable(query)) return SearchResult.Success(emptyList())
