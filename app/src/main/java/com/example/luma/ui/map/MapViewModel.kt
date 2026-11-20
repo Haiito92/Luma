@@ -73,6 +73,11 @@ class MapViewModel(
 
         searchJob?.cancel()
 
+        if (!mapRepository.isSearchable(newQuery)) {
+            updateMatches(emptyList())     // clear the suggestions right away, no waiting
+            return
+        }
+
         // Start a new search, after a pause
         searchJob = viewModelScope.launch {
             delay(500.milliseconds)

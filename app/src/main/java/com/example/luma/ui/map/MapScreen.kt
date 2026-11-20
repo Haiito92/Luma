@@ -36,6 +36,7 @@ import com.example.luma.data.local.UserLocation
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
+import org.maplibre.compose.camera.CameraFit
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.layers.CircleLayer
@@ -51,6 +52,8 @@ import org.maplibre.compose.overlay.ZoomButtons
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.util.DpPadding
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 
 @Composable
@@ -125,19 +128,35 @@ fun MapContent(
                 radius = const(7.dp), color = const(MaterialTheme.colorScheme.primary))
         }
 
-    // We use this key to track when we get the first location,
-    // we move cam on first location received
+    val route = state.routeOrNull()
     val hasLocation = userLocation != null
-    LaunchedEffect(mapLibreState, hasLocation) {
-        userLocation?.let { userLocation ->
-            mapLibreState.animateCamera(
-                update = CameraUpdate(
-                    center = Position(latitude = userLocation.latLng.latitude, longitude = userLocation.latLng.longitude),
-                    zoom = 15.0
+
+    LaunchedEffect(mapLibreState, route, hasLocation) {
+        if (route != null && route.points.size >= 2) {
+            mapLibreState.animateCameraToBounds(
+                boundingBox = route.toBoundingBox(),
+                fit = CameraFit(
+                    fitPadding = DpPadding(
+                        left = 32.dp,
+                        top = 120.dp,
+                        right = 32.dp,
+                        bottom = 220.dp
+                    )
                 )
             )
         }
+        else {
+            userLocation?.let { userLocation ->
+                mapLibreState.animateCamera(
+                    update = CameraUpdate(
+                        center = Position(latitude = userLocation.latLng.latitude, longitude = userLocation.latLng.longitude),
+                        zoom = 15.0
+                    )
+                )
+            }
+        }
     }
+
 
     MaplibreMap(state = mapLibreState,  modifier = Modifier
         .fillMaxWidth()
@@ -296,3 +315,14 @@ private fun Route?.toGeoJson(): String =
         val coordinates = points.joinToString(",") { "[${it.longitude},${it.latitude}]" }
         """{"type":"Feature","geometry":{"type":"LineString","coordinates":[$coordinates]},"properties":{}}"""
     }
+
+private fun Route.toBoundingBox(): BoundingBox {
+    val lats = points.map { it.latitude }
+    val lngs = points.map { it.longitude }
+    return BoundingBox(
+        west = lngs.min(),
+        south = lats.min(),
+        east = lngs.max(),
+        north = lats.max()
+    )
+}
