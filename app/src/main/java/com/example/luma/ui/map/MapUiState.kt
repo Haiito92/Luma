@@ -2,6 +2,7 @@ package com.example.luma.ui.map
 
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.Route
+import com.example.luma.data.local.Walk
 
 sealed interface RouteStatus{
     object Idle : RouteStatus
@@ -20,7 +21,8 @@ sealed interface MapUiState{
         val selectedDestination: Place? = null,
         val routeStatus: RouteStatus = RouteStatus.Idle
     ) : MapUiState {
-        val canConfirm: Boolean get() = selectedDestination != null
+        val readyRoute: Route? get() = (routeStatus as? RouteStatus.Ready)?.route
+        val canConfirm: Boolean get() = selectedDestination != null && readyRoute != null
     }
     data class SelectingGuardians(
         val destination: Place,
@@ -28,8 +30,7 @@ sealed interface MapUiState{
     ) : MapUiState
 
     data class WalkInProgress(
-        val destination: Place,
-        val route: Route
+        val walk: Walk
     ) : MapUiState
 }
 
@@ -37,6 +38,6 @@ fun MapUiState.routeOrNull(): Route? {
     return when (this){
         is MapUiState.SelectingDestination -> (routeStatus as? RouteStatus.Ready)?.route
         is MapUiState.SelectingGuardians -> route
-        is MapUiState.WalkInProgress -> route
+        is MapUiState.WalkInProgress -> walk.route
     }
 }

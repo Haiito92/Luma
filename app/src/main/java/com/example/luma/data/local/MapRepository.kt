@@ -1,5 +1,6 @@
 package com.example.luma.data.local
 
+import android.util.Log
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
 import kotlinx.io.IOException
@@ -29,10 +30,14 @@ class MapRepository(val photonApi: PhotonApi, val osmrApi: OsmrApi) {
             SearchResult.Success(filtered)
 
         } catch (e: IOException) {
+            Log.e("Search", "No connection", e)
             SearchResult.NoConnection
         } catch (e: HttpException) {
+            val body = e.response()?.errorBody()?.string()
+            Log.e("Search", "HTTP ${e.code()}: $body", e)
             SearchResult.ServiceUnavailable
         } catch (e: SerializationException) {
+            Log.e("Search", "Bad JSON", e)
             SearchResult.ServiceUnavailable
         }
     }

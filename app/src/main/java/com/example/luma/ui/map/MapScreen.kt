@@ -7,11 +7,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,7 +85,10 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel(factory = MapViewModelFacto
         userLocation,
         mapViewModel::onQueryChange,
         mapViewModel::onMatchSelected,
-        mapViewModel::onDestinationConfirmed)
+        mapViewModel::onDestinationConfirmed,
+        mapViewModel::onSosSent,
+        mapViewModel::onWalkCanceled,
+        mapViewModel::onWalkFinished)
 }
 
 @Composable
@@ -90,7 +97,10 @@ fun MapContent(
     userLocation: UserLocation?,
     onQueryChange: (String) -> Unit,
     onMatchSelected: (Place) -> Unit,
-    onDestinationConfirmed: () -> Unit
+    onDestinationConfirmed: () -> Unit,
+    onSosSent: () -> Unit,
+    onWalkCanceled: () -> Unit,
+    onWalkFinished: () -> Unit
 ){
     val mapLibreState =
         rememberMapState(baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty")
@@ -146,7 +156,11 @@ fun MapContent(
                 GuardiansSelection()
             }
             is MapUiState.WalkInProgress -> {
-                CurrentWalk()
+                CurrentWalk(
+                    onSosSent,
+                    onWalkCanceled,
+                    onWalkFinished
+                )
             }
         }
     }
@@ -211,8 +225,41 @@ fun GuardiansSelection(){
 }
 
 @Composable
-fun CurrentWalk(){
+fun CurrentWalk(
+    onSosSent: () -> Unit,
+    onWalkCanceled: () -> Unit,
+    onWalkFinished: () -> Unit
+){
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()
+        .padding(16.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally) {
 
+        Row(modifier = Modifier
+            .fillMaxWidth()) {
+            FilledTonalButton({ onWalkCanceled() }, modifier = Modifier
+                .weight(1.0f)) {
+                Text("Cancel")
+            }
+            FilledTonalButton({ onWalkFinished() }, modifier = Modifier
+                .weight(1.0f)) {
+                Text("Finish")
+            }
+        }
+
+        Row(modifier = Modifier
+            .height(150.dp)
+            .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center) {
+            Button({ onSosSent() }, modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()) {
+                Text("SOS")
+            }
+        }
+    }
 }
 
 @Preview
@@ -224,6 +271,9 @@ fun MapScreenPreview(){
                 MapUiState.SelectingDestination("", listOf(Place("Home", LatLng(0.0, 0.0)), Place("Gym",
                     LatLng(0.0 ,0.0)))),
                 UserLocation(LatLng(0.0,0.0), 0.0f),
+                {},
+                {},
+                {},
                 {},
                 {},
                 {})

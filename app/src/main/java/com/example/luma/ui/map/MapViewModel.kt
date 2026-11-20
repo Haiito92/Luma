@@ -7,13 +7,17 @@ import com.example.luma.data.local.MapRepository
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.RouteResult
 import com.example.luma.data.local.SearchResult
+import com.example.luma.data.local.StartWalkResult
 import com.example.luma.data.local.UserLocation
 import com.example.luma.data.local.WalkRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,8 +31,19 @@ class MapViewModel(
     private val _userLocation = MutableStateFlow<UserLocation?>(null)
     val userLocation: StateFlow<UserLocation?> = _userLocation.asStateFlow()
 
-    private val _state = MutableStateFlow<MapUiState>(MapUiState.SelectingDestination("", listOf()))
-    val state: StateFlow<MapUiState> = _state.asStateFlow()
+    private val _selectionState = MutableStateFlow<MapUiState>(MapUiState.SelectingDestination("", listOf()))
+    val state: StateFlow<MapUiState> = combine(
+        _selectionState,
+        walkRepository.activeWalk
+    ) { selection, walk ->
+        if (walk != null) MapUiState.WalkInProgress(walk) else selection
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = walkRepository.activeWalk.value
+            ?.let { MapUiState.WalkInProgress(it) }
+            ?: _selectionState.value
+    )
 
 
     private var locationJob: Job? = null
@@ -48,7 +63,7 @@ class MapViewModel(
     fun onQueryChange(newQuery: String){
 
         // We do a first update for the text to not lag
-        _state.update { current ->
+        _selectionState.update { current ->
             if (current is MapUiState.SelectingDestination) {
                 current.copy(query = newQuery, selectedDestination = null, routeStatus = RouteStatus.Idle)
             } else {
@@ -71,7 +86,7 @@ class MapViewModel(
     }
 
     private fun updateMatches(matches: List<Place>) {
-        _state.update { current ->
+        _selectionState.update { current ->
             if (current is MapUiState.SelectingDestination) current.copy(matches = matches)
             else current
         }
@@ -82,7 +97,7 @@ class MapViewModel(
 
         val currentUserLocation = _userLocation.value
 
-        _state.update { current ->
+        _selectionState.update { current ->
             if (current is MapUiState.SelectingDestination) {
                 current.copy(
                     query = match.name,
@@ -107,7 +122,7 @@ class MapViewModel(
                 is RouteResult.ServiceUnavailable -> RouteStatus.Failed
             }
 
-            _state.update { current ->
+            _selectionState.update { current ->
                 // ignore a late answer for a place the user has since changed
                 if (current is MapUiState.SelectingDestination && current.selectedDestination == match)
                     current.copy(routeStatus = routeStatus)
@@ -117,15 +132,26 @@ class MapViewModel(
     }
 
     fun onDestinationConfirmed() {
-        /* TODO move verification in walk repository*/
-        val currentState = _state.value;
+        val currentState = _selectionState.value as? MapUiState.SelectingDestination ?: return;
+        val destination = currentState.selectedDestination ?: return
+        val readyRoute = currentState.readyRoute ?: return
 
-        if (currentState is MapUiState.SelectingDestination){
-            val destination = currentState.selectedDestination?: return
-            if(currentState.routeStatus is RouteStatus.Ready){
-                walkRepository.startWalk(destination, currentState.routeStatus.route)
-                /* TODO Check for response to see if a walk was started. If so, change ui state */
-            }
+        when (val result = walkRepository.startWalk(destination, readyRoute)) {
+            is StartWalkResult.Started -> { /* TODO Handle this case */ }
+            is StartWalkResult.AlreadyInProgress -> { /* TODO Handle this case */ }
+            is StartWalkResult.InvalidRoute -> { /* TODO Handle this case */ }
         }
+    }
+
+    fun onSosSent(){
+        walkRepository.sendSos()
+    }
+
+    fun onWalkCanceled(){
+        walkRepository.cancelWalk()
+    }
+
+    fun onWalkFinished(){
+        walkRepository.finishWalk()
     }
 }
