@@ -76,9 +76,7 @@ fun GuardiansScreen(
         }
 
         is GuardiansUiState.AddingGuardian -> {
-            AddGuardiansContent(
-                onAddGuardian = viewModel::onAddGuardian
-            )
+            AddGuardiansContent(viewModel::onAddGuardian)
         }
 
         is GuardiansUiState.ViewingCourse -> {

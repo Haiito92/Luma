@@ -8,7 +8,7 @@ import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 
 
-class MapRepository(val photonApi: PhotonApi, val osmrApi: OsmrApi) {
+class MapRepository(private val photonApi: PhotonApi, private val osmrApi: OsmrApi) {
 
     fun isSearchable(query: String): Boolean = query.trim().length >= 1
 

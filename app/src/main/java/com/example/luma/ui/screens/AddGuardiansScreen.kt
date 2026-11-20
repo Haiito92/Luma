@@ -23,14 +23,10 @@ import com.example.luma.viewmodel.GuardiansViewModelFactory
 
 @Composable
 fun AddGuardiansScreen(
-    viewModel: GuardiansViewModel = viewModel(factory = GuardiansViewModelFactory),
-    onGuardianAdded: () -> Unit = {}
+    viewModel: GuardiansViewModel = viewModel(factory = GuardiansViewModelFactory)
 ) {
     AddGuardiansContent(
-        onAddGuardian = { guardianId ->
-            viewModel.onAddGuardian(guardianId)
-            onGuardianAdded()
-        }
+        viewModel::onAddGuardian
     )
 }
 
@@ -51,12 +47,12 @@ fun AddGuardiansContent(onAddGuardian: (String) -> Unit = {}) {
 
         Column(modifier = Modifier.fillMaxWidth()) {
             val inputText = rememberTextFieldState()
-            LumaTextField(state = inputText, label = "Guardian ID", maxHeightInLines = 1)
+            LumaTextField(state = inputText, label = "Guardian Email", maxHeightInLines = 1)
             LumaTextButton(
                 text = "Add",
                 onClick = {
-                    val guardianId = inputText.text.toString()
-                    onAddGuardian(guardianId)
+                    val guardianEmail = inputText.text.toString()
+                    onAddGuardian(guardianEmail)
                 }
             )
         }

@@ -1,7 +1,7 @@
 package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.luma.data.AuthRepository
+import com.example.luma.data.local.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

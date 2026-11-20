@@ -1,9 +1,12 @@
 package com.example.luma.data
 
 import android.content.Context
+import com.example.luma.data.local.AuthRepository
+import com.example.luma.data.local.guardian.GuardiansRepository
 import com.example.luma.data.local.LocationRepository
 import com.example.luma.data.local.MapRepository
-import com.example.luma.data.local.WalkRepository
+import com.example.luma.data.local.SettingsRepository
+import com.example.luma.data.local.walk.WalkRepository
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
 import com.google.firebase.firestore.FirebaseFirestore
@@ -56,5 +59,5 @@ class AppContainer(context: Context) {
 
     val settingsRepository = SettingsRepository()
 
-    val guardiansRepository = GuardiansRepository()
+    val guardiansRepository = GuardiansRepository(db, authRepository)
 }

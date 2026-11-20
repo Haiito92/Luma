@@ -1,4 +1,4 @@
-package com.example.luma.data
+package com.example.luma.data.local
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint

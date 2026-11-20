@@ -2,7 +2,7 @@ package com.example.luma.ui.map
 
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.Route
-import com.example.luma.data.local.Walk
+import com.example.luma.data.local.walk.Walk
 
 sealed interface RouteStatus{
     object Idle : RouteStatus

@@ -1,4 +1,4 @@
-package com.example.luma.data.local
+package com.example.luma.data.local.walk
 
 sealed interface StartWalkResult {
     data class Started(val walk: Walk) : StartWalkResult

@@ -1,13 +1,13 @@
 package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.luma.data.GuardiansRepository
+import com.example.luma.data.local.guardian.GuardiansRepository
 import kotlinx.coroutines.flow.StateFlow
 
-typealias FollowedPerson = com.example.luma.data.FollowedPerson
+typealias FollowedPerson = com.example.luma.data.local.guardian.FollowedPerson
 
 class FollowingViewModel(
-    private val guardiansRepository: GuardiansRepository = GuardiansRepository()
+    private val guardiansRepository: GuardiansRepository
 ) : ViewModel() {
     val followedPeople: StateFlow<List<FollowedPerson>> = guardiansRepository.guardedPeople
 

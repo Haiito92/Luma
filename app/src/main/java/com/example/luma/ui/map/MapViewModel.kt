@@ -7,9 +7,9 @@ import com.example.luma.data.local.MapRepository
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.RouteResult
 import com.example.luma.data.local.SearchResult
-import com.example.luma.data.local.StartWalkResult
+import com.example.luma.data.local.walk.StartWalkResult
 import com.example.luma.data.local.UserLocation
-import com.example.luma.data.local.WalkRepository
+import com.example.luma.data.local.walk.WalkRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

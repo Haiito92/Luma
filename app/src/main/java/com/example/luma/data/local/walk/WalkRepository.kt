@@ -1,5 +1,7 @@
-package com.example.luma.data.local
+package com.example.luma.data.local.walk
 
+import com.example.luma.data.local.Place
+import com.example.luma.data.local.Route
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

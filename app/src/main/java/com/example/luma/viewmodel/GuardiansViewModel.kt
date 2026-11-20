@@ -2,8 +2,9 @@ package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.luma.data.FollowedPerson
-import com.example.luma.data.GuardiansRepository
+import com.example.luma.data.local.guardian.FollowedPerson
+import com.example.luma.data.local.guardian.GuardiansRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 enum class GuardiansTab {
     Guardians,
@@ -46,6 +48,8 @@ class GuardiansViewModel(
             initialValue = guardiansRepository.guardedPeople.value.map { it.name }.distinct()
         )
 
+    private var addGuardianJob: Job? = null
+
     fun onTabSelected(tab: GuardiansTab) {
         _state.update { GuardiansUiState.ViewingContacts(selectedTab = tab) }
     }
@@ -54,9 +58,14 @@ class GuardiansViewModel(
         _state.update { GuardiansUiState.AddingGuardian }
     }
 
-    fun onAddGuardian(guardianId: String) {
-        guardiansRepository.addGuardian(guardianId)
-        _state.update { GuardiansUiState.ViewingContacts(selectedTab = GuardiansTab.Guardians) }
+    fun onAddGuardian(guardianEmail: String) {
+
+        addGuardianJob?.cancel()
+
+        addGuardianJob = viewModelScope.launch {
+            guardiansRepository.addGuardian(guardianEmail)
+            _state.update { GuardiansUiState.ViewingContacts(selectedTab = GuardiansTab.Guardians) }
+        }
     }
 
     fun onRemoveGuardian(name: String) {
