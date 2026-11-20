@@ -1,46 +1,38 @@
 package com.example.luma.viewmodel
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.luma.data.AuthRepository
+import com.example.luma.data.SettingsRepository
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
-class SettingsViewModel : ViewModel() {
-    private val _shareLocation = MutableStateFlow(true)
-    val shareLocation: StateFlow<Boolean> = _shareLocation.asStateFlow()
-
-    private val _nightMode = MutableStateFlow(false)
-    val nightMode: StateFlow<Boolean> = _nightMode.asStateFlow()
-
-    val colorBlindnessOptions: List<String> = listOf(
-        "None",
-        "Protanopia",
-        "Deuteranopia",
-        "Tritanopia"
-    )
-
-    private val _selectedColorBlindness = MutableStateFlow(colorBlindnessOptions.first())
-    val selectedColorBlindness: StateFlow<String> = _selectedColorBlindness.asStateFlow()
+class SettingsViewModel(
+    private val settingsRepository: SettingsRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
+    val shareLocation: StateFlow<Boolean> = settingsRepository.shareLocation
+    val nightMode: StateFlow<Boolean> = settingsRepository.nightMode
+    val colorBlindnessOptions: List<String> = settingsRepository.colorBlindnessOptions
+    val selectedColorBlindness: StateFlow<String> = settingsRepository.selectedColorBlindness
 
     fun onShareLocationChanged(enabled: Boolean) {
-        _shareLocation.update { enabled }
+        settingsRepository.setShareLocation(enabled)
         // TODO: Activer/désactiver le partage de localisation en arrière-plan
     }
 
     fun onNightModeChanged(enabled: Boolean) {
-        _nightMode.update { enabled }
+        settingsRepository.setNightMode(enabled)
     }
 
     fun onColorBlindnessSelected(option: String) {
-        _selectedColorBlindness.update { option }
+        settingsRepository.setColorBlindness(option)
     }
 
-    fun onLogOut() {
-        // TODO: Déconnecter l'utilisateur et rediriger vers l'écran de connexion
+    fun onLogOut(onComplete: () -> Unit = {}) {
+        authRepository.logout()
+        onComplete()
     }
 
-    fun onDeleteAccount() {
-        // TODO: Supprimer le compte utilisateur
+    fun onDeleteAccount(onComplete: () -> Unit = {}) {
+        authRepository.deleteCurrentAccount(onComplete)
     }
 }

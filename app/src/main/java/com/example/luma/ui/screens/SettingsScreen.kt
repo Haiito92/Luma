@@ -22,9 +22,13 @@ import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.components.LumaToggleItem
 import com.example.luma.ui.theme.LumaTheme
 import com.example.luma.viewmodel.SettingsViewModel
+import com.example.luma.viewmodel.SettingsViewModelFactory
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory),
+    onLogOutSuccess: () -> Unit = {}
+) {
     val shareLocation by viewModel.shareLocation.collectAsStateWithLifecycle()
     val nightMode by viewModel.nightMode.collectAsStateWithLifecycle()
     val selectedColorBlindness by viewModel.selectedColorBlindness.collectAsStateWithLifecycle()
@@ -37,8 +41,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
         colorBlindnessOptions = viewModel.colorBlindnessOptions,
         selectedColorBlindness = selectedColorBlindness,
         onColorBlindnessSelected = viewModel::onColorBlindnessSelected,
-        onLogOut = viewModel::onLogOut,
-        onDeleteAccount = viewModel::onDeleteAccount
+        onLogOut = { viewModel.onLogOut(onLogOutSuccess) },
+        onDeleteAccount = { viewModel.onDeleteAccount(onLogOutSuccess) }
     )
 }
 
