@@ -2,13 +2,17 @@ package com.example.luma.data.local.guardian
 
 import android.util.Log
 import com.example.luma.data.local.AuthRepository
+import com.example.luma.data.local.walk.Walk
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
 
@@ -59,7 +63,10 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
                     "guardianId" to guardianDoc.id,
                     "status" to "pending",
                     "createdAt" to FieldValue.serverTimestamp(),
-                    "guardianName" to guardianDoc.getString("name").orEmpty()
+                    "walkerName" to me.name,
+                    "walkerLastName" to me.lastName,
+                    "guardianName" to guardianDoc.getString("name").orEmpty(),
+                    "guardianLastName" to guardianDoc.getString("last name").orEmpty()
                 )
             ).await()
 
@@ -71,6 +78,38 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
             Log.e("Add Guardian", "Failed" ,e)
             AddGuardianResult.Failed
         }
+    }
+
+    fun pendingRequestsUpdates() : Flow<PendingRequestsResult> = callbackFlow {
+        val me = authRepository.currentUser.value
+        if(me == null) {
+            trySend(PendingRequestsResult.NotSignIn)
+            close()
+            return@callbackFlow
+        }
+
+        val registration = links
+            .whereEqualTo("guardianId", me.documentId)
+            .whereEqualTo("status", "pending")
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null || snapshot == null) {
+                    trySend(PendingRequestsResult.Failed)
+                    return@addSnapshotListener
+                }
+
+                val requests = snapshot.documents.map { doc ->
+                    GuardianRequest(
+                        linkId = doc.id,
+                        walkerName = doc.getString("walkerName") ?: "Unknown",
+                        walkerLastName = doc.getString("walkerLastName") ?: "Unknown",
+                        createdAtMillis = doc.getTimestamp("createdAt")?.toDate()?.time ?: Long.MAX_VALUE
+                    )
+                }.sortedByDescending { it.createdAtMillis }
+
+                trySend(PendingRequestsResult.Success(requests))
+            }
+
+        awaitClose { registration.remove() }
     }
 
     fun removeGuardian(name: String) {

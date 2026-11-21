@@ -1,6 +1,8 @@
 package com.example.luma.ui.screens
 
+import android.widget.Space
 import androidx.activity.compose.BackHandler
+import androidx.annotation.experimental.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,9 +18,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,10 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.luma.data.local.guardian.GuardianRequest
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.theme.LumaTheme
@@ -45,6 +59,7 @@ fun GuardiansScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val guardians by viewModel.guardians.collectAsStateWithLifecycle()
     val guarded by viewModel.guarded.collectAsStateWithLifecycle()
+    val pendingRequests by viewModel.pendingRequests.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onBackToContacts()
@@ -71,7 +86,8 @@ fun GuardiansScreen(
                         viewModel.onGuardedContactClicked(name)
                     }
                 },
-                onAddGuardiansClick = viewModel::onOpenAddGuardian
+                onAddGuardiansClick = viewModel::onOpenAddGuardian,
+                onViewPendingRequestClick = viewModel::onOpenViewPendingRequests
             )
         }
 
@@ -82,17 +98,22 @@ fun GuardiansScreen(
         is GuardiansUiState.ViewingCourse -> {
             FollowingCourseContent(person = currentState.person)
         }
+
+        is GuardiansUiState.ViewingPendingRequests -> {
+            PendingRequest(pendingRequests)
+        }
     }
 }
 
 @Composable
 fun GuardiansContent(
     selectedTab: GuardiansTab = GuardiansTab.Guardians,
-    contacts: List<String> = listOf("Jean-Baptiste Michelin", "Pierre Chabatte"),
+    contacts: List<String> = emptyList(),
     onGuardiansTabClick: () -> Unit = {},
     onGuardedTabClick: () -> Unit = {},
     onContactClick: (String) -> Unit = {},
-    onAddGuardiansClick: () -> Unit = {}
+    onAddGuardiansClick: () -> Unit = {} ,
+    onViewPendingRequestClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -129,11 +150,19 @@ fun GuardiansContent(
             }
         }
 
-        if (selectedTab == GuardiansTab.Guardians) {
-            LumaTextButton(
-                text = "Add Guardians",
-                onClick = onAddGuardiansClick
-            )
+        when (selectedTab){
+            GuardiansTab.Guardians -> {
+                LumaTextButton(
+                    text = "Add Guardians",
+                    onClick = onAddGuardiansClick
+                )
+            }
+            GuardiansTab.Guarded -> {
+                LumaTextButton(
+                    text = "View Pending Request",
+                    onClick = onViewPendingRequestClick
+                )
+            }
         }
     }
 }
@@ -168,6 +197,47 @@ fun ContactItem(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
+        }
+    }
+}
+
+@Composable
+fun PendingRequest(
+    requests: List<GuardianRequest>,
+){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Pending Requests",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(requests) { request ->
+                ListItem(
+                    headlineContent = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                            Text(request.walkerName)
+                            Text(request.walkerLastName)
+                        }
+                    },
+                    trailingContent = {
+                        Row {
+                            IconButton(onClick = {  }){ Icon(Icons.Default.Check, contentDescription = "Accept") }
+                            IconButton(onClick = {  }) { Icon(Icons.Default.Close, contentDescription = "Decline") }
+                        }
+                    }
+                )
+            }
         }
     }
 }

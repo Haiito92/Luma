@@ -15,7 +15,7 @@ fun LumaNavigationBar(currentRoute: String?, onNavigate: (String) -> Unit){
         NavigationBarItem(
             selected = currentRoute == "settings",
             onClick = { onNavigate("settings") },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Guardians")},
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings")},
         )
         NavigationBarItem(
             selected = currentRoute == "map",
@@ -25,7 +25,7 @@ fun LumaNavigationBar(currentRoute: String?, onNavigate: (String) -> Unit){
         NavigationBarItem(
             selected = currentRoute == "guardians",
             onClick = { onNavigate("guardians") },
-            icon = { Icon(Icons.Default.Person, contentDescription = "Settings")},
+            icon = { Icon(Icons.Default.Person, contentDescription = "Guardians")},
         )
     }
 }

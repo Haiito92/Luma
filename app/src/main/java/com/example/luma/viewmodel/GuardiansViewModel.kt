@@ -3,7 +3,9 @@ package com.example.luma.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.luma.data.local.guardian.FollowedPerson
+import com.example.luma.data.local.guardian.GuardianRequest
 import com.example.luma.data.local.guardian.GuardiansRepository
+import com.example.luma.data.local.guardian.PendingRequestsResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +31,8 @@ sealed interface GuardiansUiState {
     data class ViewingCourse(
         val person: FollowedPerson
     ) : GuardiansUiState
+
+    object ViewingPendingRequests : GuardiansUiState
 }
 
 class GuardiansViewModel(
@@ -48,7 +52,20 @@ class GuardiansViewModel(
             initialValue = guardiansRepository.guardedPeople.value.map { it.name }.distinct()
         )
 
+    private val _pendingRequests = MutableStateFlow<List<GuardianRequest>>(emptyList())
+    val pendingRequests: StateFlow<List<GuardianRequest>> = _pendingRequests.asStateFlow()
+
     private var addGuardianJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            guardiansRepository.pendingRequestsUpdates().collect { result ->
+                if (result is PendingRequestsResult.Success){
+                    _pendingRequests.value = result.requests
+                }
+            }
+        }
+    }
 
     fun onTabSelected(tab: GuardiansTab) {
         _state.update { GuardiansUiState.ViewingContacts(selectedTab = tab) }
@@ -81,5 +98,9 @@ class GuardiansViewModel(
 
     fun onBackToContacts() {
         _state.update { GuardiansUiState.ViewingContacts(selectedTab = GuardiansTab.Guardians) }
+    }
+
+    fun onOpenViewPendingRequests() {
+        _state.update { GuardiansUiState.ViewingPendingRequests }
     }
 }
