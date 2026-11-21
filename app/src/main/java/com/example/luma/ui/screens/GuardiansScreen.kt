@@ -169,7 +169,7 @@ fun GuardiansList(
         ) {
             items(guardians) { guardian ->
                 ContactItem(
-                    name = guardian.name,
+                    name = guardian.fullName,
                     linkId = guardian.linkId,
                     onClick = {  },
                     enabled = false,
@@ -199,7 +199,7 @@ fun GuardedList(
         ) {
             items(guardeds) { guarded ->
                 ContactItem(
-                    name = guarded.name,
+                    name = guarded.fullName,
                     linkId = guarded.linkId,
                     onClick = {  },
                     enabled = false,
@@ -281,10 +281,7 @@ fun PendingRequest(
             items(requests) { request ->
                 ListItem(
                     headlineContent = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)){
-                            Text(request.walkerName)
-                            Text(request.walkerLastName)
-                        }
+                        Text(request.walkerFullName)
                     },
                     trailingContent = {
                         Row {

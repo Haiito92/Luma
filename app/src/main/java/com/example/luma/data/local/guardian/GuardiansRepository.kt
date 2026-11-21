@@ -28,21 +28,7 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
     private val users by lazy { db.collection("user") }
     private val links by lazy { db.collection("links") }
 
-    private val _guardians = MutableStateFlow(
-        listOf("Jean-Baptiste Michelin", "Pierre Chabatte")
-    )
-    val guardians: StateFlow<List<String>> = _guardians.asStateFlow()
-
-    private val _guardedPeople = MutableStateFlow(
-        listOf(
-            FollowedPerson(id = "1", name = "Jean-Baptiste Michelin", remainingMinutes = 5),
-            FollowedPerson(id = "2", name = "Jean-Baptiste Michelin", remainingMinutes = 12),
-            FollowedPerson(id = "3", name = "Jean-Baptiste Michelin", remainingMinutes = 20)
-        )
-    )
-    val guardedPeople: StateFlow<List<FollowedPerson>> = _guardedPeople.asStateFlow()
-
-    private val _selectedPerson = MutableStateFlow<FollowedPerson?>(_guardedPeople.value.firstOrNull())
+    private val _selectedPerson = MutableStateFlow<FollowedPerson?>(null)
     val selectedPerson: StateFlow<FollowedPerson?> = _selectedPerson.asStateFlow()
 
     suspend fun addGuardianRequest(guardianEmail: String) : AddGuardianResult {
@@ -63,10 +49,8 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
                     "guardianId" to guardianDoc.id,
                     "status" to "pending",
                     "createdAt" to FieldValue.serverTimestamp(),
-                    "walkerName" to me.name,
-                    "walkerLastName" to me.lastName,
-                    "guardianName" to guardianDoc.getString("name").orEmpty(),
-                    "guardianLastName" to guardianDoc.getString("last name").orEmpty()
+                    "walkerFullName" to "${me.name} ${me.lastName}".trim() ,
+                    "guardianFullName" to "${guardianDoc.getString("name").orEmpty()} ${guardianDoc.getString("last name").orEmpty()}".trim(),
                 )
             ).await()
 
@@ -100,8 +84,7 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
                 val requests = snapshot.documents.map { doc ->
                     GuardianRequest(
                         linkId = doc.id,
-                        walkerName = doc.getString("walkerName") ?: "Unknown",
-                        walkerLastName = doc.getString("walkerLastName") ?: "Unknown",
+                        walkerFullName = doc.getString("walkerFullName") ?: "Unknown",
                         createdAtMillis = doc.getTimestamp("createdAt")?.toDate()?.time ?: Long.MAX_VALUE
                     )
                 }.sortedByDescending { it.createdAtMillis }
@@ -170,11 +153,11 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
 
                 val guardians = snapshot.documents.map { doc ->
                     Guardian(
-                        doc.getString("guardianName") + " " + doc.getString("guardianLastName"),
-                        doc.id
+                        fullName = doc.getString("guardianFullName").orEmpty(),
+                        linkId = doc.id
 
                     )
-                }.sortedBy { it.name }
+                }.sortedBy { it.fullName }
 
                 trySend(GuardiansResult.Success(guardians))
             }
@@ -201,10 +184,10 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
 
                 val guarded = snapshot.documents.map { doc ->
                     Guarded(
-                        doc.getString("walkerName") + " " + doc.getString("walkerLastName"),
+                        doc.getString("walkerFullName").orEmpty(),
                         doc.id
                     )
-                }.sortedBy{ it.name }
+                }.sortedBy{ it.fullName }
 
                 trySend(GuardedResult.Success(guarded))
             }
@@ -221,28 +204,14 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
     }
 
     fun updateRemainingTime(personId: String, remainingMinutes: Int) {
-        _guardedPeople.update { list ->
-            list.map { person ->
-                if (person.id == personId) person.copy(remainingMinutes = remainingMinutes) else person
-            }
-        }
-        _selectedPerson.update { current ->
-            if (current?.id == personId) current.copy(remainingMinutes = remainingMinutes) else current
-        }
+
     }
 
     fun onSosReceived(personId: String) {
-        _guardedPeople.update { list ->
-            list.map { person ->
-                if (person.id == personId) person.copy(isSosActive = true) else person
-            }
-        }
-        _selectedPerson.update { current ->
-            if (current?.id == personId) current.copy(isSosActive = true) else current
-        }
+
     }
 
     fun findFollowedPersonByName(name: String): FollowedPerson? {
-        return _guardedPeople.value.firstOrNull { it.name == name }
+        return null
     }
 }

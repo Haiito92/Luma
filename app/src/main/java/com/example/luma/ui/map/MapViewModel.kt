@@ -141,22 +141,30 @@ class MapViewModel(
         val destination = currentState.selectedDestination ?: return
         val readyRoute = currentState.readyRoute ?: return
 
-        when (val result = walkRepository.startWalk(destination, readyRoute)) {
-            is StartWalkResult.Started -> { /* TODO Handle this case */ }
-            is StartWalkResult.AlreadyInProgress -> { /* TODO Handle this case */ }
-            is StartWalkResult.InvalidRoute -> { /* TODO Handle this case */ }
+        viewModelScope.launch {
+            when (val result = walkRepository.startWalk(destination, readyRoute)) {
+                is StartWalkResult.Started -> { /* TODO Handle this case */ }
+                is StartWalkResult.AlreadyInProgress -> { /* TODO Handle this case */ }
+                is StartWalkResult.InvalidRoute -> { /* TODO Handle this case */ }
+                is StartWalkResult.NotSignedIn -> { /* TODO Handle this case */ }
+                is StartWalkResult.Failed -> { /* TODO Handle this case */ }
+            }
+        }
+    }
+
+    fun onWalkCanceled(){
+        viewModelScope.launch {
+            walkRepository.cancelWalk()
+        }
+    }
+
+    fun onWalkFinished(){
+        viewModelScope.launch {
+            walkRepository.finishWalk()
         }
     }
 
     fun onSosSent(){
         walkRepository.sendSos()
-    }
-
-    fun onWalkCanceled(){
-        walkRepository.cancelWalk()
-    }
-
-    fun onWalkFinished(){
-        walkRepository.finishWalk()
     }
 }
