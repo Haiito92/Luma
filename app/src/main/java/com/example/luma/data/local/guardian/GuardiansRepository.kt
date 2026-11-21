@@ -138,8 +138,78 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
             }
     }
 
-    fun removeGuardian(name: String) {
-        _guardians.update { it - name }
+    suspend fun removeGuardianLink(linkId: String){
+        val linkDoc = links.document(linkId)
+        if (!linkDoc.get().await().exists()) return
+
+        linkDoc.delete()
+            .addOnSuccessListener {
+                /* TODO handle success */
+            }
+            .addOnFailureListener {
+                /* TODO handle failure */
+            }
+    }
+
+    fun guardiansUpdates() : Flow<GuardiansResult> = callbackFlow {
+        val me = authRepository.currentUser.value
+        if(me == null) {
+            trySend(GuardiansResult.NotSignIn)
+            close()
+            return@callbackFlow
+        }
+
+        val registration = links
+            .whereEqualTo("walkerId", me.documentId)
+            .whereEqualTo("status", "accepted")
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null || snapshot == null) {
+                    trySend(GuardiansResult.Failed)
+                    return@addSnapshotListener
+                }
+
+                val guardians = snapshot.documents.map { doc ->
+                    Guardian(
+                        doc.getString("guardianName") + " " + doc.getString("guardianLastName"),
+                        doc.id
+
+                    )
+                }.sortedBy { it.name }
+
+                trySend(GuardiansResult.Success(guardians))
+            }
+
+        awaitClose { registration.remove() }
+    }
+
+    fun guardedUpdates() : Flow<GuardedResult> = callbackFlow {
+        val me = authRepository.currentUser.value
+        if(me == null) {
+            trySend(GuardedResult.NotSignIn)
+            close()
+            return@callbackFlow
+        }
+
+        val registration = links
+            .whereEqualTo("guardianId", me.documentId)
+            .whereEqualTo("status", "accepted")
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null || snapshot == null) {
+                    trySend(GuardedResult.Failed)
+                    return@addSnapshotListener
+                }
+
+                val guarded = snapshot.documents.map { doc ->
+                    Guarded(
+                        doc.getString("walkerName") + " " + doc.getString("walkerLastName"),
+                        doc.id
+                    )
+                }.sortedBy{ it.name }
+
+                trySend(GuardedResult.Success(guarded))
+            }
+
+        awaitClose { registration.remove() }
     }
 
     fun selectPerson(person: FollowedPerson) {

@@ -43,6 +43,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.luma.data.local.guardian.Guarded
+import com.example.luma.data.local.guardian.Guardian
 import com.example.luma.data.local.guardian.GuardianRequest
 import com.example.luma.ui.components.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaTextButton
@@ -71,23 +73,15 @@ fun GuardiansScreen(
 
     when (val currentState = state) {
         is GuardiansUiState.ViewingContacts -> {
-            val contacts = when (currentState.selectedTab) {
-                GuardiansTab.Guardians -> guardians
-                GuardiansTab.Guarded -> guarded
-            }
-
             GuardiansContent(
                 selectedTab = currentState.selectedTab,
-                contacts = contacts,
+                guardians = guardians,
+                guardeds = guarded,
                 onGuardiansTabClick = { viewModel.onTabSelected(GuardiansTab.Guardians) },
                 onGuardedTabClick = { viewModel.onTabSelected(GuardiansTab.Guarded) },
-                onContactClick = { name ->
-                    if (currentState.selectedTab == GuardiansTab.Guarded) {
-                        viewModel.onGuardedContactClicked(name)
-                    }
-                },
                 onAddGuardiansClick = viewModel::onOpenAddGuardian,
-                onViewPendingRequestClick = viewModel::onOpenViewPendingRequests
+                onViewPendingRequestClick = viewModel::onOpenViewPendingRequests,
+                onRemoveContact = viewModel::onRemoveGuardian
             )
         }
 
@@ -112,12 +106,13 @@ fun GuardiansScreen(
 @Composable
 fun GuardiansContent(
     selectedTab: GuardiansTab = GuardiansTab.Guardians,
-    contacts: List<String> = emptyList(),
+    guardians: List<Guardian> = emptyList(),
+    guardeds: List<Guarded> = emptyList(),
     onGuardiansTabClick: () -> Unit = {},
     onGuardedTabClick: () -> Unit = {},
-    onContactClick: (String) -> Unit = {},
-    onAddGuardiansClick: () -> Unit = {} ,
-    onViewPendingRequestClick: () -> Unit = {}
+    onAddGuardiansClick: () -> Unit = {},
+    onViewPendingRequestClick: () -> Unit = {},
+    onRemoveContact: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -141,30 +136,19 @@ fun GuardiansContent(
             )
         }
 
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(contacts) { name ->
-                ContactItem(
-                    name = name,
-                    onClick = { onContactClick(name) },
-                    enabled = selectedTab == GuardiansTab.Guarded
-                )
-            }
-        }
-
         when (selectedTab){
             GuardiansTab.Guardians -> {
-                LumaTextButton(
-                    text = "Add Guardians",
-                    onClick = onAddGuardiansClick
+                GuardiansList(
+                    guardians,
+                    onRemoveContact,
+                    onAddGuardiansClick
                 )
             }
             GuardiansTab.Guarded -> {
-                LumaTextButton(
-                    text = "View Pending Request",
-                    onClick = onViewPendingRequestClick
+                GuardedList(
+                    guardeds,
+                    onRemoveContact,
+                    onViewPendingRequestClick
                 )
             }
         }
@@ -172,11 +156,65 @@ fun GuardiansContent(
 }
 
 @Composable
+fun GuardiansList(
+    guardians: List<Guardian>,
+    onRemoveContact: (String) -> Unit,
+    onAddGuardiansClick: () -> Unit
+){
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(guardians) { guardian ->
+            ContactItem(
+                name = guardian.name,
+                linkId = guardian.linkId,
+                onClick = {  },
+                enabled = false,
+                onRemoveContact
+            )
+        }
+    }
+
+    LumaTextButton(
+        text = "Add Guardians",
+        onClick = onAddGuardiansClick
+    )
+}
+
+@Composable
+fun GuardedList(
+    guardeds: List<Guarded>,
+    onRemoveContact: (String) -> Unit,
+    onViewPendingRequestClick: () -> Unit
+){
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(guardeds) { guarded ->
+            ContactItem(
+                name = guarded.name,
+                linkId = guarded.linkId,
+                onClick = {  },
+                enabled = false,
+                onRemoveContact
+            )
+        }
+    }
+
+    LumaTextButton(
+        text = "View Pending Request",
+        onClick = onViewPendingRequestClick
+    )
+}
+
+@Composable
 fun ContactItem(
     name: String,
+    linkId: String,
     onClick: () -> Unit,
+    enabled: Boolean,
+    onRemoveContact: (String) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
 ) {
     Surface(
         onClick = onClick,
@@ -201,6 +239,9 @@ fun ContactItem(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
+            IconButton({}) {
+                IconButton(onClick = { onRemoveContact(linkId) }) { Icon(Icons.Default.Close, contentDescription = "Remove") }
+            }
         }
     }
 }

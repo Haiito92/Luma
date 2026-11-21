@@ -51,10 +51,10 @@ fun FollowingContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(followedPeople, key = { it.id }) { person ->
-                ContactItem(
-                    name = person.name,
-                    onClick = { onPersonClick(person) }
-                )
+                //ContactItem(
+                //    name = person.name,
+                //    onClick = { onPersonClick(person) }
+                //)
             }
         }
     }

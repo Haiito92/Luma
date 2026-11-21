@@ -3,16 +3,16 @@ package com.example.luma.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.luma.data.local.guardian.FollowedPerson
+import com.example.luma.data.local.guardian.Guarded
+import com.example.luma.data.local.guardian.GuardedResult
+import com.example.luma.data.local.guardian.Guardian
 import com.example.luma.data.local.guardian.GuardianRequest
 import com.example.luma.data.local.guardian.GuardiansRepository
+import com.example.luma.data.local.guardian.GuardiansResult
 import com.example.luma.data.local.guardian.PendingRequestsResult
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -42,21 +42,32 @@ class GuardiansViewModel(
     private val _state = MutableStateFlow<GuardiansUiState>(GuardiansUiState.ViewingContacts())
     val state: StateFlow<GuardiansUiState> = _state.asStateFlow()
 
-    val guardians: StateFlow<List<String>> = guardiansRepository.guardians
+    private val _guardians = MutableStateFlow<List<Guardian>>(emptyList())
+    val guardians: StateFlow<List<Guardian>> = _guardians.asStateFlow()
 
-    val guarded: StateFlow<List<String>> = guardiansRepository.guardedPeople
-        .map { list -> list.map { it.name }.distinct() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = guardiansRepository.guardedPeople.value.map { it.name }.distinct()
-        )
+    private val _guarded = MutableStateFlow<List<Guarded>>(emptyList())
+    val guarded: StateFlow<List<Guarded>> = _guarded.asStateFlow()
 
     private val _pendingRequests = MutableStateFlow<List<GuardianRequest>>(emptyList())
     val pendingRequests: StateFlow<List<GuardianRequest>> = _pendingRequests.asStateFlow()
 
-
     init {
+        viewModelScope.launch {
+            guardiansRepository.guardiansUpdates().collect { result ->
+                if (result is GuardiansResult.Success){
+                    _guardians.value = result.guardians
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            guardiansRepository.guardedUpdates().collect { result ->
+                if (result is GuardedResult.Success){
+                    _guarded.value = result.guarded
+                }
+            }
+        }
+
         viewModelScope.launch {
             guardiansRepository.pendingRequestsUpdates().collect { result ->
                 if (result is PendingRequestsResult.Success){
@@ -81,8 +92,10 @@ class GuardiansViewModel(
         }
     }
 
-    fun onRemoveGuardian(name: String) {
-        guardiansRepository.removeGuardian(name)
+    fun onRemoveGuardian(linkId: String) {
+        viewModelScope.launch {
+            guardiansRepository.removeGuardianLink(linkId)
+        }
     }
 
     fun onGuardedContactClicked(name: String) {
