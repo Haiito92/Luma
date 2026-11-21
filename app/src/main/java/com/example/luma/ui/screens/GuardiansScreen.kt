@@ -53,6 +53,7 @@ import com.example.luma.viewmodel.GuardiansTab
 import com.example.luma.viewmodel.GuardiansUiState
 import com.example.luma.viewmodel.GuardiansViewModel
 import com.example.luma.viewmodel.GuardiansViewModelFactory
+import com.google.shopping.type.Weight
 
 @Composable
 fun GuardiansScreen(
@@ -161,24 +162,28 @@ fun GuardiansList(
     onRemoveContact: (String) -> Unit,
     onAddGuardiansClick: () -> Unit
 ){
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(guardians) { guardian ->
-            ContactItem(
-                name = guardian.name,
-                linkId = guardian.linkId,
-                onClick = {  },
-                enabled = false,
-                onRemoveContact
-            )
+    Column(modifier = Modifier.fillMaxSize()){
+        LazyColumn(
+            modifier = Modifier.weight(1.0f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(guardians) { guardian ->
+                ContactItem(
+                    name = guardian.name,
+                    linkId = guardian.linkId,
+                    onClick = {  },
+                    enabled = false,
+                    onRemoveContact
+                )
+            }
         }
+
+        LumaTextButton(
+            text = "Add Guardians",
+            onClick = onAddGuardiansClick
+        )
     }
 
-    LumaTextButton(
-        text = "Add Guardians",
-        onClick = onAddGuardiansClick
-    )
 }
 
 @Composable
@@ -187,24 +192,28 @@ fun GuardedList(
     onRemoveContact: (String) -> Unit,
     onViewPendingRequestClick: () -> Unit
 ){
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(guardeds) { guarded ->
-            ContactItem(
-                name = guarded.name,
-                linkId = guarded.linkId,
-                onClick = {  },
-                enabled = false,
-                onRemoveContact
-            )
+    Column(modifier = Modifier.fillMaxSize()){
+        LazyColumn(
+            modifier = Modifier.weight(1.0f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(guardeds) { guarded ->
+                ContactItem(
+                    name = guarded.name,
+                    linkId = guarded.linkId,
+                    onClick = {  },
+                    enabled = false,
+                    onRemoveContact
+                )
+            }
         }
+
+        LumaTextButton(
+            text = "View Pending Request",
+            onClick = onViewPendingRequestClick
+        )
     }
 
-    LumaTextButton(
-        text = "View Pending Request",
-        onClick = onViewPendingRequestClick
-    )
 }
 
 @Composable
