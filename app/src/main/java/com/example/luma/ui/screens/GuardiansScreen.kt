@@ -100,7 +100,11 @@ fun GuardiansScreen(
         }
 
         is GuardiansUiState.ViewingPendingRequests -> {
-            PendingRequest(pendingRequests)
+            PendingRequest(
+                pendingRequests,
+                viewModel::onAcceptGuardianRequest,
+                viewModel::onDeclineGuardianRequest
+            )
         }
     }
 }
@@ -204,6 +208,8 @@ fun ContactItem(
 @Composable
 fun PendingRequest(
     requests: List<GuardianRequest>,
+    onAcceptGuardianRequest: (String) -> Unit,
+    onDeclineGuardianRequest: (String) -> Unit,
 ){
     Column(
         modifier = Modifier
@@ -232,8 +238,8 @@ fun PendingRequest(
                     },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = {  }){ Icon(Icons.Default.Check, contentDescription = "Accept") }
-                            IconButton(onClick = {  }) { Icon(Icons.Default.Close, contentDescription = "Decline") }
+                            IconButton(onClick = { onAcceptGuardianRequest(request.linkId)  }){ Icon(Icons.Default.Check, contentDescription = "Accept") }
+                            IconButton(onClick = { onDeclineGuardianRequest(request.linkId) }) { Icon(Icons.Default.Close, contentDescription = "Decline") }
                         }
                     }
                 )

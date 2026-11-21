@@ -45,7 +45,7 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
     private val _selectedPerson = MutableStateFlow<FollowedPerson?>(_guardedPeople.value.firstOrNull())
     val selectedPerson: StateFlow<FollowedPerson?> = _selectedPerson.asStateFlow()
 
-    suspend fun addGuardian(guardianEmail: String) : AddGuardianResult {
+    suspend fun addGuardianRequest(guardianEmail: String) : AddGuardianResult {
         val me = authRepository.currentUser.value ?: return AddGuardianResult.NotSignedIn
         val email = guardianEmail.trim().lowercase()
         if (email == me.email.trim().lowercase()) return AddGuardianResult.CannotAddSelf
@@ -110,6 +110,32 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
             }
 
         awaitClose { registration.remove() }
+    }
+
+    suspend fun acceptGuardianRequest(linkId: String){
+        val linkDoc = links.document(linkId)
+        if (!linkDoc.get().await().exists()) return
+
+        linkDoc.update("status", "accepted")
+            .addOnSuccessListener {
+                /* TODO handle success */
+            }
+            .addOnFailureListener {
+                /* TODO handle failure */
+            }
+    }
+
+    suspend fun declineGuardianRequest(linkId: String){
+        val linkDoc = links.document(linkId)
+        if (!linkDoc.get().await().exists()) return
+
+        linkDoc.delete()
+            .addOnSuccessListener {
+                /* TODO handle success */
+            }
+            .addOnFailureListener {
+                /* TODO handle failure */
+            }
     }
 
     fun removeGuardian(name: String) {

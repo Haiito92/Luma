@@ -55,7 +55,6 @@ class GuardiansViewModel(
     private val _pendingRequests = MutableStateFlow<List<GuardianRequest>>(emptyList())
     val pendingRequests: StateFlow<List<GuardianRequest>> = _pendingRequests.asStateFlow()
 
-    private var addGuardianJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -76,11 +75,8 @@ class GuardiansViewModel(
     }
 
     fun onAddGuardian(guardianEmail: String) {
-
-        addGuardianJob?.cancel()
-
-        addGuardianJob = viewModelScope.launch {
-            guardiansRepository.addGuardian(guardianEmail)
+        viewModelScope.launch {
+            guardiansRepository.addGuardianRequest(guardianEmail)
             _state.update { GuardiansUiState.ViewingContacts(selectedTab = GuardiansTab.Guardians) }
         }
     }
@@ -102,5 +98,17 @@ class GuardiansViewModel(
 
     fun onOpenViewPendingRequests() {
         _state.update { GuardiansUiState.ViewingPendingRequests }
+    }
+
+    fun onAcceptGuardianRequest(linkId: String){
+        viewModelScope.launch {
+            guardiansRepository.acceptGuardianRequest(linkId)
+        }
+    }
+
+    fun onDeclineGuardianRequest(linkId: String){
+        viewModelScope.launch {
+            guardiansRepository.declineGuardianRequest(linkId)
+        }
     }
 }
