@@ -1,4 +1,4 @@
-package com.example.luma.ui.login
+package com.example.luma.ui.auth
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer

@@ -1,7 +1,7 @@
 package com.example.luma.data
 
 import android.content.Context
-import com.example.luma.data.local.AuthRepository
+import com.example.luma.data.local.auth.AuthRepository
 import com.example.luma.data.local.guardian.GuardiansRepository
 import com.example.luma.data.local.LocationRepository
 import com.example.luma.data.local.MapRepository
@@ -9,12 +9,12 @@ import com.example.luma.data.local.SettingsRepository
 import com.example.luma.data.local.walk.WalkRepository
 import com.example.luma.data.remote.OsmrApi
 import com.example.luma.data.remote.PhotonApi
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
-import okhttp3.Dispatcher
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -26,6 +26,7 @@ class AppContainer(context: Context) {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -60,7 +61,7 @@ class AppContainer(context: Context) {
 
     val locationRepository = LocationRepository(context.applicationContext)
 
-    val authRepository = AuthRepository(db)
+    val authRepository = AuthRepository(db, auth)
 
     val guardiansRepository = GuardiansRepository(db, authRepository)
 

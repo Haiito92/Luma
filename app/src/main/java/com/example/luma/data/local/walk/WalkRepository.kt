@@ -1,7 +1,7 @@
 package com.example.luma.data.local.walk
 
 import android.os.SystemClock
-import com.example.luma.data.local.AuthRepository
+import com.example.luma.data.local.auth.AuthRepository
 import com.example.luma.data.local.LatLng
 import com.example.luma.data.local.LocationRepository
 import com.example.luma.data.local.Place

@@ -1,8 +1,7 @@
 package com.example.luma.data.local.guardian
 
 import android.util.Log
-import com.example.luma.data.local.AuthRepository
-import com.example.luma.data.local.walk.Walk
+import com.example.luma.data.local.auth.AuthRepository
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore

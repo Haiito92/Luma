@@ -1,4 +1,4 @@
-package com.example.luma.ui.login
+package com.example.luma.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,38 +23,31 @@ import com.example.luma.ui.components.LumaTextField
 import com.example.luma.ui.theme.LumaTheme
 
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory),
-    onLoginSuccess: () -> Unit = {},
-    onNavigateToSignUp: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {}
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val authUiState by viewModel.authUiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state) {
-        if (state is AuthUiState.Authenticated) {
-            viewModel.resetState()
-            onLoginSuccess()
-        }
-    }
-
-    LoginContent(
-        isLoading = state is AuthUiState.Loading,
-        errorMessage = (state as? AuthUiState.Error)?.message,
-        onLoginClick = viewModel::onLogin,
-        onNavigateToSignUp = {
-            viewModel.resetState()
-            onNavigateToSignUp()
+    SignUpContent(
+        isLoading = authUiState is AuthUiState.Loading,
+        errorMessage = (authUiState as? AuthUiState.Error)?.message,
+        onSignUpClick = viewModel::onSignUp,
+        onNavigateToLogin = {
+            onNavigateToLogin()
         }
     )
 }
 
 @Composable
-fun LoginContent(
+fun SignUpContent(
     isLoading: Boolean = false,
     errorMessage: String? = null,
-    onLoginClick: (String, String) -> Unit = { _, _ -> },
-    onNavigateToSignUp: () -> Unit = {}
+    onSignUpClick: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    onNavigateToLogin: () -> Unit = {}
 ) {
+    val firstNameState = rememberTextFieldState()
+    val lastNameState = rememberTextFieldState()
     val emailState = rememberTextFieldState()
     val passwordState = rememberTextFieldState()
 
@@ -66,10 +59,22 @@ fun LoginContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Login",
+            text = "Sign Up",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        LumaTextField(
+            state = firstNameState,
+            label = "First Name",
+            maxHeightInLines = 1
+        )
+
+        LumaTextField(
+            state = lastNameState,
+            label = "Last Name",
+            maxHeightInLines = 1
         )
 
         LumaTextField(
@@ -93,9 +98,11 @@ fun LoginContent(
         }
 
         LumaTextButton(
-            text = if (isLoading) "Loading..." else "Log In",
+            text = if (isLoading) "Loading..." else "Create Account",
             onClick = {
-                onLoginClick(
+                onSignUpClick(
+                    firstNameState.text.toString(),
+                    lastNameState.text.toString(),
                     emailState.text.toString(),
                     passwordState.text.toString()
                 )
@@ -104,8 +111,8 @@ fun LoginContent(
         )
 
         LumaTextButton(
-            text = "Sign Up",
-            onClick = onNavigateToSignUp,
+            text = "Back to Login",
+            onClick = onNavigateToLogin,
             enabled = !isLoading
         )
     }
@@ -113,8 +120,8 @@ fun LoginContent(
 
 @Preview
 @Composable
-fun LoginScreenPreview() {
+fun SignUpScreenPreview() {
     LumaTheme {
-        LoginContent()
+        SignUpContent()
     }
 }

@@ -25,7 +25,6 @@ import com.example.luma.ui.theme.LumaTheme
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory),
-    onLogOutSuccess: () -> Unit = {}
 ) {
     val shareLocation by viewModel.shareLocation.collectAsStateWithLifecycle()
     val nightMode by viewModel.nightMode.collectAsStateWithLifecycle()
@@ -39,8 +38,8 @@ fun SettingsScreen(
         colorBlindnessOptions = viewModel.colorBlindnessOptions,
         selectedColorBlindness = selectedColorBlindness,
         onColorBlindnessSelected = viewModel::onColorBlindnessSelected,
-        onLogOut = { viewModel.onLogOut(onLogOutSuccess) },
-        onDeleteAccount = { viewModel.onDeleteAccount(onLogOutSuccess) }
+        onLogOut = { viewModel.onLogOut() },
+        onDeleteAccount = { viewModel.onDeleteAccount() }
     )
 }
 

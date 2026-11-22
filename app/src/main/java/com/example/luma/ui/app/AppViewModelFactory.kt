@@ -9,6 +9,7 @@ val AppViewModelFactory = viewModelFactory {
     initializer {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
         AppViewModel(
+            app.container.authRepository
         )
     }
 }

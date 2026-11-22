@@ -1,7 +1,7 @@
 package com.example.luma.ui.settings
 
 import androidx.lifecycle.ViewModel
-import com.example.luma.data.local.AuthRepository
+import com.example.luma.data.local.auth.AuthRepository
 import com.example.luma.data.local.SettingsRepository
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,12 +27,11 @@ class SettingsViewModel(
         settingsRepository.setColorBlindness(option)
     }
 
-    fun onLogOut(onComplete: () -> Unit = {}) {
+    fun onLogOut() {
         authRepository.logout()
-        onComplete()
     }
 
-    fun onDeleteAccount(onComplete: () -> Unit = {}) {
-        authRepository.deleteCurrentAccount(onComplete)
+    fun onDeleteAccount() {
+        authRepository.deleteCurrentAccount()
     }
 }
