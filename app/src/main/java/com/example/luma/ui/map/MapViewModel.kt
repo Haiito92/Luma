@@ -9,6 +9,7 @@ import com.example.luma.data.local.RouteResult
 import com.example.luma.data.local.SearchResult
 import com.example.luma.data.local.walk.StartWalkResult
 import com.example.luma.data.local.UserLocation
+import com.example.luma.data.local.walk.SosResult
 import com.example.luma.data.local.walk.WalkRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -165,6 +166,13 @@ class MapViewModel(
     }
 
     fun onSosSent(){
-        walkRepository.sendSos()
+        viewModelScope.launch {
+            when(val result = walkRepository.sendSos()){
+                SosResult.Success -> { /* TODO */  }
+                SosResult.AlreadySent -> { /* TODO */ }
+                SosResult.NoActiveWalk -> { /* TODO */ }
+                SosResult.Failed -> { /* TODO */ }
+            }
+        }
     }
 }

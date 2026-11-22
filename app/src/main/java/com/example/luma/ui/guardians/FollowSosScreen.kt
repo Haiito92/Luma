@@ -30,16 +30,17 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun FollowingCourseScreen(
-    viewModel: FollowingViewModel = viewModel(factory = FollowingViewModelFactory)
+fun FollowSosScreen(
+    walkId: String,
+    viewModel: FollowSosViewModel = viewModel(factory = FollowSosViewModelFactory)
 ) {
     val selectedPerson by viewModel.selectedPerson.collectAsStateWithLifecycle()
 
-    FollowingCourseContent(person = selectedPerson)
+    FollowSosContent(person = selectedPerson)
 }
 
 @Composable
-fun FollowingCourseContent(person: FollowedPerson?) {
+fun FollowSosContent(person: FollowedPerson?) {
     val remainingMinutes = person?.remainingMinutes ?: 5
 
     Column(
@@ -160,7 +161,7 @@ fun FollowingCourseScreenPreview() {
 
     LumaTheme {
         LumaAppPreviewScaffold {
-            FollowingCourseContent(person = samplePerson)
+            FollowSosContent(person = samplePerson)
         }
     }
 }

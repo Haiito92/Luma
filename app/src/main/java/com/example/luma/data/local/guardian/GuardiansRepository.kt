@@ -183,8 +183,10 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
 
                 val guarded = snapshot.documents.map { doc ->
                     Guarded(
+                        doc.getString("walkerId").orEmpty(),
                         doc.getString("walkerFullName").orEmpty(),
-                        doc.id
+                        doc.id,
+
                     )
                 }.sortedBy{ it.fullName }
 
@@ -192,6 +194,18 @@ class GuardiansRepository(val db: FirebaseFirestore, val authRepository: AuthRep
             }
 
         awaitClose { registration.remove() }
+    }
+
+    suspend fun getGuardiansIds() : List<String>{
+        val me = authRepository.currentUser.value ?: return emptyList()
+
+        return links
+            .whereEqualTo("walkerId", me.documentId)
+            .whereEqualTo("status", "accepted")
+            .get()
+            .await()
+            .documents
+            .mapNotNull { it.getString("guardianId") }
     }
 
     fun selectPerson(person: FollowedPerson) {

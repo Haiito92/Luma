@@ -9,7 +9,8 @@ val GuardiansViewModelFactory = viewModelFactory {
     initializer {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
         GuardiansViewModel(
-            app.container.guardiansRepository
+            app.container.guardiansRepository,
+            app.container.walkRepository
         )
     }
 }

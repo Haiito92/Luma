@@ -5,10 +5,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.luma.LumaApplication
 
-val FollowingViewModelFactory = viewModelFactory {
+val FollowSosViewModelFactory = viewModelFactory {
     initializer {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
-        FollowingViewModel(
+        FollowSosViewModel(
             app.container.guardiansRepository
         )
     }

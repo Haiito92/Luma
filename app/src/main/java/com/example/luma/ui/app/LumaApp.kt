@@ -11,10 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.luma.data.local.auth.AuthState
 import com.example.luma.ui.components.LumaNavigationBar
 import com.example.luma.ui.guardians.GuardiansScreen
@@ -22,6 +24,8 @@ import com.example.luma.ui.auth.LoginScreen
 import com.example.luma.ui.map.MapScreen
 import com.example.luma.ui.settings.SettingsScreen
 import com.example.luma.ui.auth.SignUpScreen
+import com.example.luma.ui.guardians.FollowSosScreen
+import org.maplibre.compose.expressions.dsl.list
 
 @Composable
 fun LumaApp(appViewModel: AppViewModel = viewModel(factory = AppViewModelFactory)) {
@@ -105,7 +109,24 @@ fun LumaApp(appViewModel: AppViewModel = viewModel(factory = AppViewModelFactory
                 SettingsScreen()
             }
             composable("map") { MapScreen() }
-            composable("guardians") { GuardiansScreen() }
+            composable("guardians") {
+                GuardiansScreen(
+                onViewSos = { walkId ->
+                    navController.navigate("followSos/$walkId")
+                })
+            }
+            composable(
+                "followSos/{walkId}",
+                arguments = listOf(
+                    navArgument("walkId"){ type = NavType.StringType }
+                )
+            ){ backStackEntry ->
+                val walkId = backStackEntry.arguments?.getString("walkId")
+
+                if (walkId != null){
+                    FollowSosScreen(walkId)
+                }
+            }
         }
     }
 }

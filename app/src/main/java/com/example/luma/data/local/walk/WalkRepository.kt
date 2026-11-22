@@ -1,12 +1,15 @@
 package com.example.luma.data.local.walk
 
 import android.os.SystemClock
+import android.util.Log
 import com.example.luma.data.local.auth.AuthRepository
 import com.example.luma.data.local.LatLng
 import com.example.luma.data.local.LocationRepository
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.Route
+import com.example.luma.data.local.auth.AuthState
 import com.example.luma.data.local.distanceMeters
+import com.example.luma.data.local.guardian.GuardedResult
 import com.example.luma.data.local.guardian.GuardiansRepository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,9 +17,12 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -42,19 +48,29 @@ class WalkRepository(
 
         return try{
 
+            val guardiansId = guardiansRepository.getGuardiansIds()
             val walkRef = walks.document()
 
             walkRef.set(
                 mapOf(
                     "walkerId" to me.documentId,
                     "walkerFullName" to "${me.name} ${me.lastName}",
-                    "guardiansIds" to emptyList<String>(),
+                    "guardiansIds" to guardiansId,
                     "status" to "active",
+                    "sosActive" to false,
+                    "sosAt" to -1,
                     "destination" to mapOf(
                         "name" to destination.name,
                         "location" to GeoPoint(destination.latLng.latitude, destination.latLng.longitude)
                     ),
-                    "startedAt" to FieldValue.serverTimestamp()
+                    "startedAt" to FieldValue.serverTimestamp(),
+                    "route" to mapOf(
+                        "points" to route.points.map { point ->
+                            "location" to GeoPoint(point.latitude, point.longitude)
+                        },
+                        "distanceMeters" to route.distanceMeters,
+                        "durationSeconds" to route.durationSeconds
+                    )
                 )
             ).await()
 
@@ -126,7 +142,60 @@ class WalkRepository(
         }
     }
 
-    fun sendSos() : SosResult {
-        return SosResult.Success
+    suspend fun sendSos() : SosResult {
+        val walk = _activeWalk.value ?: return SosResult.NoActiveWalk
+
+        return try {
+
+            val walkRef = walks.document(walk.id)
+                .get()
+                .await()
+
+            if (walkRef.getBoolean("sosActive") == true) {
+                return SosResult.AlreadySent
+            }
+
+            walks.document(walk.id)
+                .update("sosActive", true,
+                "sosAt", FieldValue.serverTimestamp())
+                .await()
+
+            SosResult.Success
+        }
+        catch (e: FirebaseFirestoreException){
+            Log.e("SOS", e.message, e)
+            SosResult.Failed
+        }
+    }
+
+    fun sosWalksUpdates(): Flow<SosWalksResult> = callbackFlow {
+        val me = authRepository.currentUser.value
+
+        if(me == null) {
+            trySend(SosWalksResult.NotSignedIn)
+            close()
+            return@callbackFlow
+        }
+
+        val registration = walks
+            .whereArrayContains("guardiansIds", me.documentId)
+            .whereEqualTo("sosActive", true)
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null || snapshot == null) {
+                    trySend(SosWalksResult.Failed)
+                    return@addSnapshotListener
+                }
+
+                val sosWalks = snapshot.documents.map { doc ->
+                    SosWalk(
+                        doc.id,
+                        doc.getString("walkerId").orEmpty()
+                    )
+                }
+
+                trySend(SosWalksResult.Success(sosWalks))
+            }
+
+        awaitClose { registration.remove() }
     }
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 typealias FollowedPerson = com.example.luma.data.local.guardian.FollowedPerson
 
-class FollowingViewModel(
+class FollowSosViewModel(
     private val guardiansRepository: GuardiansRepository
 ) : ViewModel() {
 

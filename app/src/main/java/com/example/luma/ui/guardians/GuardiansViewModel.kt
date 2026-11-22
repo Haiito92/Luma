@@ -10,9 +10,16 @@ import com.example.luma.data.local.guardian.GuardianRequest
 import com.example.luma.data.local.guardian.GuardiansRepository
 import com.example.luma.data.local.guardian.GuardiansResult
 import com.example.luma.data.local.guardian.PendingRequestsResult
+import com.example.luma.data.local.walk.SosWalk
+import com.example.luma.data.local.walk.SosWalksResult
+import com.example.luma.data.local.walk.WalkRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -28,15 +35,12 @@ sealed interface GuardiansUiState {
 
     object AddingGuardian : GuardiansUiState
 
-    data class ViewingCourse(
-        val person: FollowedPerson
-    ) : GuardiansUiState
-
     object ViewingPendingRequests : GuardiansUiState
 }
 
 class GuardiansViewModel(
-    private val guardiansRepository: GuardiansRepository
+    private val guardiansRepository: GuardiansRepository,
+    private val walkRepository: WalkRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<GuardiansUiState>(GuardiansUiState.ViewingContacts())
@@ -45,11 +49,32 @@ class GuardiansViewModel(
     private val _guardians = MutableStateFlow<List<Guardian>>(emptyList())
     val guardians: StateFlow<List<Guardian>> = _guardians.asStateFlow()
 
-    private val _guarded = MutableStateFlow<List<Guarded>>(emptyList())
-    val guarded: StateFlow<List<Guarded>> = _guarded.asStateFlow()
-
     private val _pendingRequests = MutableStateFlow<List<GuardianRequest>>(emptyList())
     val pendingRequests: StateFlow<List<GuardianRequest>> = _pendingRequests.asStateFlow()
+
+    private val _sosWalks = MutableStateFlow<List<SosWalk>>(emptyList())
+
+    private val _guarded = MutableStateFlow<List<Guarded>>(emptyList())
+
+    val guarded: StateFlow<List<GuardedUiItemState>> =
+        combine(_guarded, _sosWalks) { guardedPeople, sosWalks ->
+            guardedPeople.map { person ->
+                val sosWalk = sosWalks.firstOrNull(){
+                    it.walkerId == person.walkerId
+                }
+
+                GuardedUiItemState(
+                    walkerId = person.walkerId,
+                    fullName = person.fullName,
+                    linkId = person.linkId,
+                    sosWalkId = sosWalk?.walkId
+                )
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            emptyList()
+        )
 
     init {
         viewModelScope.launch {
@@ -75,6 +100,14 @@ class GuardiansViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            walkRepository.sosWalksUpdates().collect { result ->
+                if (result is SosWalksResult.Success){
+                    _sosWalks.value = result.sosWalks
+                }
+            }
+        }
     }
 
     fun onTabSelected(tab: GuardiansTab) {
@@ -96,13 +129,6 @@ class GuardiansViewModel(
         viewModelScope.launch {
             guardiansRepository.removeGuardianLink(linkId)
         }
-    }
-
-    fun onGuardedContactClicked(name: String) {
-        val person = guardiansRepository.findFollowedPersonByName(name)
-            ?: FollowedPerson(id = name, name = name, remainingMinutes = 5)
-        guardiansRepository.selectPerson(person)
-        _state.update { GuardiansUiState.ViewingCourse(person) }
     }
 
     fun onBackToContacts() {

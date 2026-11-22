@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -46,6 +49,7 @@ import com.example.luma.ui.theme.LumaTheme
 
 @Composable
 fun GuardiansScreen(
+    onViewSos: (String) -> Unit,
     viewModel: GuardiansViewModel = viewModel(factory = GuardiansViewModelFactory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -71,16 +75,13 @@ fun GuardiansScreen(
                 onGuardedTabClick = { viewModel.onTabSelected(GuardiansTab.Guarded) },
                 onAddGuardiansClick = viewModel::onOpenAddGuardian,
                 onViewPendingRequestClick = viewModel::onOpenViewPendingRequests,
-                onRemoveContact = viewModel::onRemoveGuardian
+                onRemoveContact = viewModel::onRemoveGuardian,
+                onViewSos
             )
         }
 
         is GuardiansUiState.AddingGuardian -> {
             AddGuardiansContent(viewModel::onAddGuardian)
-        }
-
-        is GuardiansUiState.ViewingCourse -> {
-            FollowingCourseContent(person = currentState.person)
         }
 
         is GuardiansUiState.ViewingPendingRequests -> {
@@ -97,12 +98,13 @@ fun GuardiansScreen(
 fun GuardiansContent(
     selectedTab: GuardiansTab = GuardiansTab.Guardians,
     guardians: List<Guardian> = emptyList(),
-    guardeds: List<Guarded> = emptyList(),
+    guardeds: List<GuardedUiItemState> = emptyList(),
     onGuardiansTabClick: () -> Unit = {},
     onGuardedTabClick: () -> Unit = {},
     onAddGuardiansClick: () -> Unit = {},
     onViewPendingRequestClick: () -> Unit = {},
-    onRemoveContact: (String) -> Unit = {}
+    onRemoveContact: (String) -> Unit = {},
+    onViewSos: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -138,7 +140,8 @@ fun GuardiansContent(
                 GuardedList(
                     guardeds,
                     onRemoveContact,
-                    onViewPendingRequestClick
+                    onViewPendingRequestClick,
+                    onViewSos
                 )
             }
         }
@@ -157,11 +160,9 @@ fun GuardiansList(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(guardians) { guardian ->
-                ContactItem(
+                GuardianItem(
                     name = guardian.fullName,
                     linkId = guardian.linkId,
-                    onClick = {  },
-                    enabled = false,
                     onRemoveContact
                 )
             }
@@ -176,47 +177,13 @@ fun GuardiansList(
 }
 
 @Composable
-fun GuardedList(
-    guardeds: List<Guarded>,
-    onRemoveContact: (String) -> Unit,
-    onViewPendingRequestClick: () -> Unit
-){
-    Column(modifier = Modifier.fillMaxSize()){
-        LazyColumn(
-            modifier = Modifier.weight(1.0f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(guardeds) { guarded ->
-                ContactItem(
-                    name = guarded.fullName,
-                    linkId = guarded.linkId,
-                    onClick = {  },
-                    enabled = false,
-                    onRemoveContact
-                )
-            }
-        }
-
-        LumaTextButton(
-            text = "View Pending Request",
-            onClick = onViewPendingRequestClick
-        )
-    }
-
-}
-
-@Composable
-fun ContactItem(
+fun GuardianItem(
     name: String,
     linkId: String,
-    onClick: () -> Unit,
-    enabled: Boolean,
     onRemoveContact: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        onClick = onClick,
-        enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.primary
@@ -239,6 +206,79 @@ fun ContactItem(
             )
             IconButton({}) {
                 IconButton(onClick = { onRemoveContact(linkId) }) { Icon(Icons.Default.Close, contentDescription = "Remove") }
+            }
+        }
+    }
+}
+
+@Composable
+fun GuardedList(
+    guardeds: List<GuardedUiItemState>,
+    onRemoveContact: (String) -> Unit,
+    onViewPendingRequestClick: () -> Unit,
+    onViewSos: (String) -> Unit
+){
+    Column(modifier = Modifier.fillMaxSize()){
+        LazyColumn(
+            modifier = Modifier.weight(1.0f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(guardeds) { guarded ->
+                GuardedItem(
+                    guarded,
+                    onRemoveContact,
+                    onViewSos
+                )
+            }
+        }
+
+        LumaTextButton(
+            text = "View Pending Request",
+            onClick = onViewPendingRequestClick
+        )
+    }
+
+}
+
+@Composable
+fun GuardedItem(
+    guardedUiItemState: GuardedUiItemState,
+    onRemoveContact: (String) -> Unit,
+    onViewSos: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = guardedUiItemState.fullName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            IconButton({}) {
+                IconButton(onClick = { onRemoveContact(guardedUiItemState.linkId) }) { Icon(Icons.Default.Close, contentDescription = "Remove") }
+            }
+
+            if(guardedUiItemState.hasActiveSos){
+                Button({
+                    onViewSos(guardedUiItemState.sosWalkId!!)
+                },
+                    colors = ButtonDefaults.filledTonalButtonColors()) {
+                    Text("SOS")
+                }
             }
         }
     }
