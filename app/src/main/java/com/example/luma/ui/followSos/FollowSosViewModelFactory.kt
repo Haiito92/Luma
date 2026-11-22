@@ -1,4 +1,4 @@
-package com.example.luma.ui.guardians
+package com.example.luma.ui.followSos
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
@@ -9,7 +9,7 @@ val FollowSosViewModelFactory = viewModelFactory {
     initializer {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
         FollowSosViewModel(
-            app.container.guardiansRepository
+            app.container.walkRepository
         )
     }
 }

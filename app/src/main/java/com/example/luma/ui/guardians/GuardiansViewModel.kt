@@ -2,7 +2,6 @@ package com.example.luma.ui.guardians
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.luma.data.local.guardian.FollowedPerson
 import com.example.luma.data.local.guardian.Guarded
 import com.example.luma.data.local.guardian.GuardedResult
 import com.example.luma.data.local.guardian.Guardian
@@ -11,12 +10,11 @@ import com.example.luma.data.local.guardian.GuardiansRepository
 import com.example.luma.data.local.guardian.GuardiansResult
 import com.example.luma.data.local.guardian.PendingRequestsResult
 import com.example.luma.data.local.walk.SosWalk
-import com.example.luma.data.local.walk.SosWalksResult
+import com.example.luma.data.local.walk.SosWalksUpdateResult
 import com.example.luma.data.local.walk.WalkRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -103,7 +101,7 @@ class GuardiansViewModel(
 
         viewModelScope.launch {
             walkRepository.sosWalksUpdates().collect { result ->
-                if (result is SosWalksResult.Success){
+                if (result is SosWalksUpdateResult.Success){
                     _sosWalks.value = result.sosWalks
                 }
             }

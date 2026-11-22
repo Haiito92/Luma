@@ -38,6 +38,9 @@ import com.example.luma.data.local.walk.WalkService
 import com.example.luma.ui.app.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
+import com.example.luma.utils.toBoundingBox
+import com.example.luma.utils.toGeoJson
+import com.example.luma.utils.toPointGeoJson
 import org.maplibre.compose.camera.CameraFit
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.const
@@ -344,31 +347,3 @@ fun MapScreenPreview(){
     }
 }
 
-private fun UserLocation?.toGeoJson(): String =
-    this?.latLng?.toPointGeoJson() ?: """{"type":"FeatureCollection","features":[]}"""
-
-private fun LatLng?.toPointGeoJson(): String =
-    if (this == null) {
-        """{"type":"FeatureCollection","features":[]}"""
-    } else {
-        """{"type":"Feature","geometry":{"type":"Point","coordinates":[$longitude,$latitude]},"properties":{}}"""
-    }
-
-private fun Route?.toGeoJson(): String =
-    if (this == null || points.size < 2) {
-        """{"type":"FeatureCollection","features":[]}"""
-    } else {
-        val coordinates = points.joinToString(",") { "[${it.longitude},${it.latitude}]" }
-        """{"type":"Feature","geometry":{"type":"LineString","coordinates":[$coordinates]},"properties":{}}"""
-    }
-
-private fun Route.toBoundingBox(): BoundingBox {
-    val lats = points.map { it.latitude }
-    val lngs = points.map { it.longitude }
-    return BoundingBox(
-        west = lngs.min(),
-        south = lats.min(),
-        east = lngs.max(),
-        north = lats.max()
-    )
-}

@@ -7,6 +7,7 @@ import com.example.luma.data.local.LatLng
 import com.example.luma.data.local.LocationRepository
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.Route
+import com.example.luma.data.local.UserLocation
 import com.example.luma.data.local.auth.AuthState
 import com.example.luma.data.local.distanceMeters
 import com.example.luma.data.local.guardian.GuardedResult
@@ -66,7 +67,7 @@ class WalkRepository(
                     "startedAt" to FieldValue.serverTimestamp(),
                     "route" to mapOf(
                         "points" to route.points.map { point ->
-                            "location" to GeoPoint(point.latitude, point.longitude)
+                            GeoPoint(point.latitude, point.longitude)
                         },
                         "distanceMeters" to route.distanceMeters,
                         "durationSeconds" to route.durationSeconds
@@ -74,7 +75,7 @@ class WalkRepository(
                 )
             ).await()
 
-            val walk = Walk(walkRef.id, destination, route)
+            val walk = Walk(walkRef.id, destination, route, route.points[0])
             _activeWalk.value = walk
             startPublishing(walk.id)
             return StartWalkResult.Started(walk)
@@ -168,11 +169,11 @@ class WalkRepository(
         }
     }
 
-    fun sosWalksUpdates(): Flow<SosWalksResult> = callbackFlow {
+    fun sosWalksUpdates(): Flow<SosWalksUpdateResult> = callbackFlow {
         val me = authRepository.currentUser.value
 
         if(me == null) {
-            trySend(SosWalksResult.NotSignedIn)
+            trySend(SosWalksUpdateResult.NotSignedIn)
             close()
             return@callbackFlow
         }
@@ -182,7 +183,7 @@ class WalkRepository(
             .whereEqualTo("sosActive", true)
             .addSnapshotListener { snapshot, exception ->
                 if(exception != null || snapshot == null) {
-                    trySend(SosWalksResult.Failed)
+                    trySend(SosWalksUpdateResult.Failed)
                     return@addSnapshotListener
                 }
 
@@ -193,9 +194,55 @@ class WalkRepository(
                     )
                 }
 
-                trySend(SosWalksResult.Success(sosWalks))
+                trySend(SosWalksUpdateResult.Success(sosWalks))
             }
 
         awaitClose { registration.remove() }
     }
+
+    fun observeWalk(walkId: String): Flow<ObserveWalkResult> = callbackFlow {
+
+        val registration = walks
+            .document(walkId)
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null || snapshot == null) {
+                    trySend(ObserveWalkResult.Failed)
+                    return@addSnapshotListener
+                }
+
+                if (!snapshot.exists()) {
+                    trySend(ObserveWalkResult.WalkNotFound)
+                    return@addSnapshotListener
+                }
+
+                val destinationData = snapshot.get("destination") as Map<String, Any>
+                val name = destinationData["name"] as String
+                val location = destinationData["location"] as GeoPoint
+
+                val routeData = snapshot.get("route") as Map<String, Any>
+                val pointsData = routeData["points"] as List<GeoPoint>
+                val distanceMeters = routeData["distanceMeters"] as Double
+                val durationSeconds = routeData["durationSeconds"] as Double
+
+                val position = snapshot.getGeoPoint("position")?: GeoPoint(0.0, 0.0)
+
+                val walk = Walk(
+                    id = walkId,
+                    destination = Place(
+                        name = name,
+                        latLng = LatLng(location.latitude, location.longitude)
+                    ),
+                    route = Route(
+                        points = pointsData.map { LatLng(it.latitude, it.longitude) },
+                        distanceMeters = distanceMeters,
+                        durationSeconds = durationSeconds
+                    ),
+                    LatLng(position.latitude, position.longitude)
+                )
+
+                trySend(ObserveWalkResult.Success(walk))
+            }
+        awaitClose { registration.remove() }
+    }
+
 }

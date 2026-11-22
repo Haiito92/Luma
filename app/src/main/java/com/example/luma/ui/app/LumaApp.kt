@@ -24,8 +24,7 @@ import com.example.luma.ui.auth.LoginScreen
 import com.example.luma.ui.map.MapScreen
 import com.example.luma.ui.settings.SettingsScreen
 import com.example.luma.ui.auth.SignUpScreen
-import com.example.luma.ui.guardians.FollowSosScreen
-import org.maplibre.compose.expressions.dsl.list
+import com.example.luma.ui.followSos.FollowSosScreen
 
 @Composable
 fun LumaApp(appViewModel: AppViewModel = viewModel(factory = AppViewModelFactory)) {
