@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.luma.ui.components.LumaApp
+import com.example.luma.ui.app.LumaApp
 import com.example.luma.ui.theme.LumaTheme
 
 class MainActivity : ComponentActivity() {

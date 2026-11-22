@@ -1,14 +1,14 @@
-package com.example.luma.viewmodel
+package com.example.luma.ui.guardians
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.luma.LumaApplication
 
-val GuardiansViewModelFactory = viewModelFactory {
+val FollowingViewModelFactory = viewModelFactory {
     initializer {
         val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LumaApplication
-        GuardiansViewModel(
+        FollowingViewModel(
             app.container.guardiansRepository
         )
     }

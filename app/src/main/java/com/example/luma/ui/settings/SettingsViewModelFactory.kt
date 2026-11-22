@@ -1,4 +1,4 @@
-package com.example.luma.viewmodel
+package com.example.luma.ui.settings
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer

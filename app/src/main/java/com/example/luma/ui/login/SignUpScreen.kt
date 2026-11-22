@@ -1,4 +1,4 @@
-package com.example.luma.ui.screens
+package com.example.luma.ui.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,9 +21,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.components.LumaTextField
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.AuthUiState
-import com.example.luma.viewmodel.AuthViewModel
-import com.example.luma.viewmodel.AuthViewModelFactory
 
 @Composable
 fun SignUpScreen(

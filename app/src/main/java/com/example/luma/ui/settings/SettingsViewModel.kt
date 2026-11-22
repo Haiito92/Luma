@@ -1,4 +1,4 @@
-package com.example.luma.viewmodel
+package com.example.luma.ui.settings
 
 import androidx.lifecycle.ViewModel
 import com.example.luma.data.local.AuthRepository

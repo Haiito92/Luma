@@ -1,8 +1,6 @@
-package com.example.luma.ui.screens
+package com.example.luma.ui.guardians
 
-import android.widget.Space
 import androidx.activity.compose.BackHandler
-import androidx.annotation.experimental.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,19 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,14 +40,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luma.data.local.guardian.Guarded
 import com.example.luma.data.local.guardian.Guardian
 import com.example.luma.data.local.guardian.GuardianRequest
-import com.example.luma.ui.components.LumaAppPreviewScaffold
+import com.example.luma.ui.app.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.GuardiansTab
-import com.example.luma.viewmodel.GuardiansUiState
-import com.example.luma.viewmodel.GuardiansViewModel
-import com.example.luma.viewmodel.GuardiansViewModelFactory
-import com.google.shopping.type.Weight
 
 @Composable
 fun GuardiansScreen(

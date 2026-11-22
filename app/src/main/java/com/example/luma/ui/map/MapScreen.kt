@@ -1,7 +1,9 @@
 package com.example.luma.ui.map
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +34,8 @@ import com.example.luma.data.local.LatLng
 import com.example.luma.data.local.Place
 import com.example.luma.data.local.Route
 import com.example.luma.data.local.UserLocation
-import com.example.luma.ui.components.LumaAppPreviewScaffold
+import com.example.luma.data.local.walk.WalkService
+import com.example.luma.ui.app.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaDockedSearchBar
 import com.example.luma.ui.theme.LumaTheme
 import org.maplibre.compose.camera.CameraFit
@@ -80,6 +83,26 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel(factory = MapViewModelFacto
         }
         if (alreadyGranted) mapViewModel.onLocationPermissionResult(true)
         else permissionLauncher.launch(permissions)
+    }
+
+    val notificationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* nothing to do: the service works either way */ }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    LaunchedEffect(state is MapUiState.WalkInProgress) {
+        if(state is MapUiState.WalkInProgress){
+            ContextCompat.startForegroundService(context, Intent(context, WalkService::class.java))
+
+        }
     }
 
     MapContent(

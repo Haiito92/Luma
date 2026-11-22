@@ -1,4 +1,4 @@
-package com.example.luma.ui.screens
+package com.example.luma.ui.guardians
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,11 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.luma.ui.components.LumaAppPreviewScaffold
+import com.example.luma.ui.app.LumaAppPreviewScaffold
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.FollowedPerson
-import com.example.luma.viewmodel.FollowingViewModel
-import com.example.luma.viewmodel.FollowingViewModelFactory
 
 @Composable
 fun FollowingScreen(

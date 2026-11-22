@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.luma"
-        minSdk = 25
+        minSdk = 29
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"

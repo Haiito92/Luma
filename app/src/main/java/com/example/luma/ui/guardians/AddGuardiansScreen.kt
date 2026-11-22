@@ -1,4 +1,4 @@
-package com.example.luma.ui.screens
+package com.example.luma.ui.guardians
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,12 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.luma.ui.components.LumaAppPreviewScaffold
+import com.example.luma.ui.app.LumaAppPreviewScaffold
 import com.example.luma.ui.components.LumaTextButton
 import com.example.luma.ui.components.LumaTextField
 import com.example.luma.ui.theme.LumaTheme
-import com.example.luma.viewmodel.GuardiansViewModel
-import com.example.luma.viewmodel.GuardiansViewModelFactory
 
 @Composable
 fun AddGuardiansScreen(
